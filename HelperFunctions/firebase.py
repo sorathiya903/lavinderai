@@ -1,6 +1,7 @@
 import requests
+import os
 
-FIREBASE_URL = "https://chatting-e3bb2-default-rtdb.firebaseio.com/chatbotsFGH"
+FIREBASE_URL = os.environ.get("FIREBASE_URL")"
 
 def save_data(slug, data):
     url = f"{FIREBASE_URL}/{slug}.json"

@@ -2,11 +2,54 @@ from flask import Flask, render_template, request, redirect
 from HelperFunctions.firebase import save_data, get_data
 import secrets 
 
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+def ask_groq(system_prompt, user_msg):
+    url = "https://api.groq.com/openai/v1/chat/completions"
+
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "model": "groq/compound-mini", 
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_msg}
+        ]
+    }
+
+    res = requests.post(url, headers=headers, json=data)
+    result = res.json()
+
+    return result["choices"][0]["message"]["content"]
+
+
+
 app = Flask(__name__)
 
 @app.route("/favicon.ico")
 def favicon():
     return "", 204
+
+@app.route("/api/chat/<slug>", methods=["POST"])
+def chat_api(slug):
+    data = get_data(slug)
+
+    if not data:
+        return {"reply": "Chatbot not found"}
+
+    user_msg = request.json.get("message")
+
+    # 🧠 Use DB content as system prompt
+    system_prompt = data.get("content", "You are a helpful assistant.")
+
+    # 🤖 Get AI reply
+    reply = ask_groq(system_prompt, user_msg)
+
+    return {"reply": reply}
+
 
 
 @app.route("/", methods=["GET", "POST"])

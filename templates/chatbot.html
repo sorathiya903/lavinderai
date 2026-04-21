@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ data.name }}</title>
   <style>
     body { font-family: Arial; background:#eef2f7; }
-    .chatbox { width:350px; margin:50px auto; background:white; padding:15px; border-radius:10px; }
+.chatbox {
+  width: 90%;
+  max-width: 400px;
+  margin: 20px auto;
+}
     .messages { height:200px; overflow-y:auto; border:1px solid #ccc; padding:10px; }
     input { width:75%; padding:8px; }
     button { padding:8px; }
@@ -23,38 +28,36 @@
 </div>
 
 <script>
-function send() {
-  let msg = document.getElementById("msg").value;
-  let box = document.getElementById("messages");
-
-  let user = "<p><b>You:</b> " + msg + "</p>";
-  box.innerHTML += user;
-
-  let reply = "Sorry, I don't understand.";
-
-  async function send() {
+async function send() {
     let msg = document.getElementById("msg").value;
+    let box = document.getElementById("messages");
 
-    document.getElementById("chat").innerHTML += "<p><b>You:</b> " + msg + "</p>";
+    if (!msg) return;
 
-    let res = await fetch("/api/chat/{{ slug }}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message: msg })
-    });
+    // show user message
+    box.innerHTML += "<p><b>You:</b> " + msg + "</p>";
 
-    let data = await res.json();
+    try {
+        let res = await fetch("/api/chat/{{ slug }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message: msg })
+        });
 
-    document.getElementById("chat").innerHTML += "<p><b>Bot:</b> " + data.reply + "</p>";
+        let data = await res.json();
+
+        // show bot reply
+        box.innerHTML += "<p><b>Bot:</b> " + data.reply + "</p>";
+    } catch (err) {
+        box.innerHTML += "<p><b>Bot:</b> Error connecting to server</p>";
+    }
 
     document.getElementById("msg").value = "";
+    box.scrollTop = box.scrollHeight;
 }
-
-  
-
-</script>
+  </script>
 
 </body>
 </html>

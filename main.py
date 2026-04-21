@@ -1,8 +1,14 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify 
 from HelperFunctions.firebase import save_data, get_data
 import secrets 
+import os
+import requests
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+if not GROQ_API_KEY:
+    raise Exception("GROQ_API_KEY not set")
+
 
 def ask_groq(system_prompt, user_msg):
     url = "https://api.groq.com/openai/v1/chat/completions"
@@ -25,8 +31,10 @@ def ask_groq(system_prompt, user_msg):
     res = requests.post(url, headers=headers, json=data)
     result = res.json()
 
-    return result["choices"][0]["message"]["content"]
-
+    try:
+        return result["choices"][0]["message"]["content"]
+    except:
+        return "⚠️ AI error. Please try again."
 
 
 app = Flask(__name__)
@@ -53,7 +61,7 @@ def chat_api(slug):
     # 🤖 Get AI reply
     reply = ask_groq(system_prompt, user_msg)
 
-    return {"reply": reply}
+    return jsonify({"reply": reply})
 
 
 
@@ -126,4 +134,4 @@ def dashboard(slug):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

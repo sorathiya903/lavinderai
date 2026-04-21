@@ -1,42 +1,487 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ data.name }}</title>
   <style>
-    body { font-family: Arial; background:#eef2f7; }
-.chatbox {
-  width: 90%;
-  max-width: 400px;
-  margin: 20px auto;
+    :root {
+      --purple: #7c4dff;
+      --purple-light: #edeaff;
+      --grey-light: #dbd8e9;
+      --grey-lighter: #f7f6fb;
+      --grey-dark: #777777;
+      --input-bg: #e8e6f4;
+      --sidebar-bg: #e5e1f8;
+      --bg-white: #fff;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+  height: 100%;
 }
-    .messages { height:200px; overflow-y:auto; border:1px solid #ccc; padding:10px; }
-    input { width:75%; padding:8px; }
-    button { padding:8px; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background: var(--grey-lighter);
+      color: #1a1a1a;
+      
+      
+      
+      
+      padding: 0;
+    }
+    .container {
+      background: var(--bg-white);
+      width: 100%;
+      
+      height: 100vh;
+      display: flex;
+      border: red solid 1px;
+      
+      flex-direction: row;
+    }
+    .sidebar {
+      background: var(--sidebar-bg);
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--purple);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .logo svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--purple);
+    }
+    button.new-chat {
+      background-color: var(--purple);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button.new-chat:hover {
+      background-color: #5a35d0;
+    }
+    button.new-chat svg {
+      width: 16px;
+      height: 16px;
+      stroke: white;
+    }
+    .chat-history-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #444;
+      font-size: 14px;
+    }
+    .chat-history {
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    .chat-history-item {
+      background-color: var(--purple-light);
+      border-radius: 12px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .chat-history-item:hover {
+      background-color: var(--grey-light);
+    }
+    .chat-history-item .icon {
+      width: 16px;
+      height: 16px;
+      fill: #666;
+      margin-right: 6px;
+      flex-shrink: 0;
+    }
+    .chat-history-item-options {
+      cursor: pointer;
+      color: #666;
+      font-weight: 700;
+      font-size: 20px;
+      user-select: none;
+    }
+    .sidebar-footer {
+      font-size: 14px;
+      color: #555;
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .sidebar-footer button {
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      padding: 6px;
+      color: var(--purple);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+    .sidebar-footer button svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--purple);
+    }
+    .main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--grey-light);
+      background-color: var(--bg-white);
+    }
+    .header {
+      flex-shrink: 0;
+      padding: 20px 24px;
+      font-weight: 600;
+      font-size: 16px;
+      border-bottom: 1px solid var(--grey-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header .icons > svg {
+      cursor: pointer;
+      margin-left: 16px;
+      width: 20px;
+      height: 20px;
+      stroke: var(--purple);
+      fill: none;
+      stroke-width: 2;
+      transition: stroke 0.3s;
+    }
+    .header .icons > svg:hover {
+      stroke: #3019cc;
+    }
+   .chat-window {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;  /* FIX */
+  justify-content: flex-start; /* FIX */
+  padding: 20px;
+  overflow-y: auto;
+}
+    .welcome-box {
+      max-width: 640px;
+      background: var(--bg-white);
+      border-radius: 16px;
+      box-shadow: 0 0 8px rgb(0 0 0 / 0.04);
+      padding: 40px;
+      text-align: center;
+      user-select: none;
+    }
+    .welcome-box h1 {
+      color: var(--purple);
+      font-weight: 700;
+      font-size: 28px;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    .welcome-box p {
+      margin: 0 0 24px;
+      font-weight: 400;
+      font-size: 16px;
+      color: #555;
+    }
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+    .button-row button {
+      padding: 10px 18px;
+      border-radius: 30px;
+      border: none;
+      background-color: var(--grey-light);
+      font-size: 14px;
+      color: #333;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      min-width: 140px;
+      white-space: nowrap;
+    }
+    .button-row button:hover {
+      background-color: var(--grey-lighter);
+    }
+    .chat-content {
+      width: 100%;
+      max-width: 640px;
+      padding: 20px 40px 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      font-size: 15px;
+      color: #333;
+      overflow-y: auto;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    .message {
+      display: flex;margin:5px;
+      gap: 12px;
+      align-items: flex-start;
+      max-width: 100%;
+      word-wrap: break-word;
+      word-break: break-word;
+    }
+    .message.user {
+      justify-content: flex-end;
+    }
+     .bubble {
+      background-color: var(--purple);
+      color: white;
+        
+      border-radius: 16px 16px 0 16px;
+    }
+    .message.bot .bubble {
+      background-color: var(--grey-light);
+      color: #333;
+      border-radius: 16px 16px 16px 0;
+    }
+    .bubble {
+      padding: 14px 20px;
+      font-size: 15px;
+      line-height: 1.5;
+      max-width: 70%;
+      box-shadow: 0 2px 6px rgb(0 0 0 / 0.06);
+    }
+    .input-area {
+      border-top: 1px solid var(--grey-light);
+      padding: 12px 20px;
+      background: var(--bg-white);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .input-area input {
+      flex-grow: 1;
+      border: none;
+      background-color: var(--input-bg);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 16px;
+      outline: none;
+      color: #111;
+      transition: background-color 0.3s;
+    }
+    .input-area input::placeholder {
+      color: var(--grey-dark);
+    }
+    .input-area button {
+      background-color: var(--purple);
+      border: none;
+      padding: 12px 18px;
+      border-radius: 0 12px 12px 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: background-color 0.3s;
+      font-size: 16px;
+    }
+    .input-area button:hover {
+      background-color: #5a35d0;
+    }
+    .input-area button svg {
+      width: 20px;
+      height: 20px;
+      stroke: white;
+      stroke-width: 2;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        height: 90vh;
+        max-width: 100%;
+      }
+      .sidebar {
+          display:flex;
+        width: 100%;
+        flex-direction: row;
+        padding: 12px;
+        gap: 12px;justify-content:space-between;align-items:center;
+        overflow-x: auto;
+      }
+      .logo {
+        display: none;
+      }
+      
+      
+      
+     
+      .sidebar-footer {
+        flex-direction: row;
+        gap: 12px;
+        margin-top: 0;
+      }
+      .main {
+        flex-grow: 1;
+        border-left: none;
+        border-top: 1px solid var(--grey-light);
+      }
+      .header {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+      .header .icons svg {
+        width: 18px;
+        height: 18px;
+        margin-left: 12px;
+      }
+      .chat-window {
+          overflow:scroll;
+        padding: 20px 12px;
+      }
+      .welcome-box {
+        width: 100%;
+        padding: 24px;
+        font-size: 14px;
+      }
+      .button-row {
+        gap: 8px;
+      }
+      .button-row button {
+        min-width: 120px;
+        font-size: 13px;
+        padding: 8px 14px;
+      }
+      .chat-content {
+        padding: 16px 20px 80px;
+        font-size: 14px;
+      }
+      .message .bubble {
+        max-width: 85%;
+      }
+      .input-area {
+        padding: 8px 12px;
+      }
+      .input-area input {
+        font-size: 14px;
+      }
+      .input-area button {
+        padding: 10px 14px;
+        font-size: 14px;border-radius:5px;
+      }
+    }
+    
+    .clear{
+        background:transparent;
+        border:none
+    }
   </style>
 </head>
 <body>
+  <div class="container" role="main">
+    <aside class="sidebar" aria-label="Chat sidebar">
+        <h3>{{ data.name }}</h3>   <button class="clear" onclick="clearHistory()"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="#000000"><path fill="#000000" d="M12 21q-3.15 0-5.575-1.913T3.275 14.2q-.1-.375.15-.687t.675-.363q.4-.05.725.15t.45.6q.6 2.25 2.475 3.675T12 19q.275 0 .513-.013t.487-.062v2.025q-.25.025-.488.038T12 21Zm6.5-2.575L17.1 19.8q-.275.275-.688.288T15.7 19.8q-.275-.275-.275-.7t.275-.7l1.4-1.4l-1.4-1.4q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275l1.4 1.4l1.4-1.4q.275-.275.688-.287t.712.287q.275.275.275.7t-.275.7L19.925 17l1.375 1.4q.275.275.288.688t-.288.712q-.275.275-.7.275t-.7-.275l-1.4-1.375ZM12 5q-1.725 0-3.225.8T6.25 8H8q.425 0 .713.288T9 9q0 .425-.288.713T8 10H4q-.425 0-.713-.288T3 9V5q0-.425.288-.713T4 4q.425 0 .713.288T5 5v1.35q1.275-1.6 3.113-2.475T12 3q3.75 0 6.375 2.625T21 12h-2q0-2.925-2.038-4.963T12 5Zm1.35 9.75L11.3 12.7q-.15-.15-.225-.338T11 11.975V8q0-.425.288-.713T12 7q.425 0 .713.288T13 8v3.6l1.4 1.4l-1.05 1.75Z"/></svg></button>
+    </aside>
+    <main class="main" role="main" aria-labelledby="main-header">
+      
+      <section id="messages" class="chat-window" aria-live="polite" aria-atomic="false" aria-relevant="additions">
+        <div class="welcome-box" id="welcome" role="region" aria-label="Welcome message">
+<h1>Welcome to <strong>{{ data.name }}</strong></h1>
+<p style="font-size:12px; color:#888;">
+Powered by LavinderAI
+</p>
+        </div>
+      </section>
+      <div class="input-area" aria-label="Type your message form" onsubmit="sendMessage(event)">
+        <input
+          type="text"
+          id="msg"
+          placeholder="Type your message here..."
+          autocomplete="on"
+          required
+          aria-required="true"
+          aria-describedby="warning-text"
+        />
+        <button onclick="send()" aria-label="Send message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      <p id="warning-text" style="text-align:center;font-size: 10px; color: #555; padding: 4px 20px;">
+        LavinderAI may produce inaccurate information, double check it.
+      </p>
+    </main>
+  </div>
+    <script>
+    const STORAGE_KEY = "chat_history_{{ slug }}";
+   function saveMessage(role, text) {
+    let history = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    history.push({ role, text });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+}
+    function clearHistory() {
+    localStorage.removeItem(STORAGE_KEY);
 
-<div class="chatbox">
-  <h2>{{ data.name }}</h2>
-  
+    let box = document.getElementById("messages");
 
-  <div class="messages" id="messages"></div>
-
-  <input id="msg" placeholder="Type message...">
-  <button onclick="send()">Send</button>
-</div>
-
-<script>
-async function send() {
+    box.innerHTML = `
+        <div class="welcome-box" id="welcome">
+            <h1>Welcome to <strong>{{ data.name }}</strong></h1>
+            <p style="font-size:12px; color:#888;">
+            Powered by LavinderAI
+            </p>
+        </div>
+    `;
+}
+    async function send() {
+        let welcome = document.getElementById("welcome");
+if (welcome) welcome.remove();
     let msg = document.getElementById("msg").value;
     let box = document.getElementById("messages");
 
-    if (!msg) return;
-
+    if (!msg) { alert("Enter your query first")
+        return;}
+ let userConta = document.createElement("div")
+        userConta.className="message user"
+        let userMsg =document.createElement("div")
+        userMsg.className="bubble"
     // show user message
-    box.innerHTML += "<p><b>You:</b> " + msg + "</p>";
-
+        userConta.appendChild(userMsg)
+        userMsg.textContent=msg
+    box.appendChild(userConta)
+saveMessage("user", msg);
     try {
         let res = await fetch("/api/chat/{{ slug }}", {
             method: "POST",
@@ -49,15 +494,58 @@ async function send() {
         let data = await res.json();
 
         // show bot reply
-        box.innerHTML += "<p><b>Bot:</b> " + data.reply + "</p>";
+        let botConta = document.createElement("div");
+botConta.className = "message bot";
+
+let botMsg = document.createElement("div");
+botMsg.className = "bubble";
+
+botMsg.textContent = data.reply;
+
+botConta.appendChild(botMsg);
+box.appendChild(botConta);
+        saveMessage("bot", data.reply);
     } catch (err) {
-        box.innerHTML += "<p><b>Bot:</b> Error connecting to server</p>";
-    }
+      let botConta = document.createElement("div");
+botConta.className = "message bot";
+
+let botMsg = document.createElement("div");
+botMsg.className = "bubble";
+
+botMsg.textContent = "Some error occured, Try again.";
+
+botConta.appendChild(botMsg);
+box.appendChild(botConta);
+ saveMessage("bot", "Some error occured, Try again.");   }
 
     document.getElementById("msg").value = "";
     box.scrollTop = box.scrollHeight;
 }
-  </script>
+    
+    window.onload = function () {
+    let history = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    let box = document.getElementById("messages");
 
+    if (history.length > 0) {
+        let welcome = document.getElementById("welcome");
+        if (welcome) welcome.remove();
+    }
+
+    history.forEach(item => {
+        let container = document.createElement("div");
+        container.className = "message " + item.role;
+
+        let bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = item.text;
+
+        container.appendChild(bubble);
+        box.appendChild(container);
+    });
+
+    box.scrollTop = box.scrollHeight;
+};
+    </script>
+  
 </body>
 </html>

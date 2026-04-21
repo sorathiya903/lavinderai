@@ -1,1 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ data.name }}</title>
+  <style>
+    body { font-family: Arial; background:#eef2f7; }
+    .chatbox { width:350px; margin:50px auto; background:white; padding:15px; border-radius:10px; }
+    .messages { height:200px; overflow-y:auto; border:1px solid #ccc; padding:10px; }
+    input { width:75%; padding:8px; }
+    button { padding:8px; }
+  </style>
+</head>
+<body>
 
+<div class="chatbox">
+  <h2>{{ data.name }}</h2>
+  <p>{{ data.content }}</p>
+
+  <div class="messages" id="messages"></div>
+
+  <input id="msg" placeholder="Type message...">
+  <button onclick="send()">Send</button>
+</div>
+
+<script>
+function send() {
+  let msg = document.getElementById("msg").value;
+  let box = document.getElementById("messages");
+
+  let user = "<p><b>You:</b> " + msg + "</p>";
+  box.innerHTML += user;
+
+  let reply = "Sorry, I don't understand.";
+
+  if (msg.toLowerCase().includes("hello")) {
+    reply = "Hello! Welcome to {{ data.name }}";
+  }
+
+  if (msg.toLowerCase().includes("info")) {
+    reply = "{{ data.content }}";
+  }
+
+  let bot = "<p><b>Bot:</b> " + reply + "</p>";
+  box.innerHTML += bot;
+
+  document.getElementById("msg").value = "";
+}
+</script>
+
+</body>
+</html>

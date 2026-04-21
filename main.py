@@ -96,7 +96,7 @@ def chat_api(slug):
 
 @app.route("/")
 def landing():
-    render_template("landing.html")
+    return render_template("landing.html")
 
 
 @app.route("/create", methods=["GET", "POST"])

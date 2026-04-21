@@ -94,8 +94,12 @@ def chat_api(slug):
     return jsonify({"reply": reply})
 
 
+@app.route("/")
+def landing():
+    render_template("landing.html")
 
-@app.route("/", methods=["GET", "POST"])
+
+@app.route("/create", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
         email = request.form.get("email")

@@ -4,6 +4,35 @@ import secrets
 import os
 import requests
 
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+
+def send_email(to_email, slug, secret_key):
+    url = "https://api.resend.com/emails"
+
+    headers = {
+        "Authorization": f"Bearer {RESEND_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    public_url = f"https://ai-faq-chatbot-for-businesses.onrender.com/{slug}"
+    dashboard_url = f"https://ai-faq-chatbot-for-businesses.onrender.com/dashboard/{slug}?key={secret_key}"
+
+    data = {
+        "from": "onboarding@resend.dev",
+        "to": [to_email],
+        "subject": "Your Chatbot is Ready 🚀",
+        "html": f"""
+        <h2>Your chatbot is ready!</h2>
+        <p><b>Public URL:</b> {public_url}</p>
+        <p><b>Dashboard:</b> {dashboard_url}</p>
+        <p style="color:red;">Save this link safely.</p>
+        """
+    }
+
+    try:
+        requests.post(url, headers=headers, json=data)
+    except:
+        pass  # avoid breaking app if email fails
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 if not GROQ_API_KEY:
@@ -85,6 +114,7 @@ def home():
         "content": content,
         "secret": secret_key
         })
+        send_email(email, slug, secret_key)
 
         return f"""
         <h3>✅ Chatbot Created!</h3>

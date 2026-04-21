@@ -1,32 +1,196 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
-  <style>
-    body { font-family: Arial; background:#f5f5f5; text-align:center; }
-    .box { background:white; padding:20px; margin:50px auto; width:300px; border-radius:10px; }
-    input, textarea { width:90%; padding:10px; margin:8px 0; }
-    button { padding:10px; background:#2196F3; color:white; border:none; }
-  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ data.name }}</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f7f6fb;
+    color: #222;
+  }
+
+  /* Top bar */
+  .topbar {
+    background: white;
+    padding: 18px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+  }
+
+  .logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #7c4dff;
+  }
+
+  .slug {
+    font-size: 13px;
+    color: #777;
+  }
+
+  /* Main container */
+  .container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+  }
+
+  /* Card */
+  .card {
+    background: white;
+    border-radius: 14px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .card h2 {
+    margin-bottom: 18px;
+    color: #333;
+  }
+
+  /* Inputs */
+  input, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s;
+  }
+
+  input:focus, textarea:focus {
+    border-color: #7c4dff;
+    box-shadow: 0 0 0 3px rgba(124,77,255,0.1);
+  }
+
+  textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  /* Button */
+  button {
+    background: #7c4dff;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    margin-top: 10px;
+    transition: 0.2s;
+  }
+
+  button:hover {
+    background: #6a3df0;
+  }
+
+  /* Link box */
+  .link-box {
+    margin-top: 20px;
+    background: #f1efff;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #7c4dff;
+  }
+
+  .link-box a {
+    color: #7c4dff;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  /* Footer hint */
+  .hint {
+    font-size: 13px;
+    color: #777;
+    margin-top: 10px;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .container {
+      margin: 20px auto;
+      padding: 10px;
+    }
+  }
+</style>
 </head>
+
 <body>
 
-<div class="box">
-  <h2>Edit Chatbot</h2>
-
-  <form method="POST">
-    <input name="name" value="{{ data.name }}" required><br>
-    <textarea name="content">{{ data.content }}</textarea><br>
-
-    <button type="submit">Update</button>
-  </form>
-
-  <hr>
-
-  <p>Public Link:</p>
-  <a href="/{{ slug }}" target="_blank">/{{ slug }}</a>
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="logo">{{ data.name }}</div>
+  <div class="slug">Manage your chatbot</div>
 </div>
 
+<!-- Main -->
+<div class="container">
+
+  <div class="card">
+
+    <h2>Edit Chatbot</h2>
+
+    <form method="POST">
+
+      <input name="name" value="{{ data.name }}" required>
+
+      <textarea name="content">{{ data.content }}</textarea>
+
+      <button type="submit">Update</button>
+
+    </form>
+
+    <div class="link-box">
+      <p>Public Link:</p>
+      <a href="/{{ slug }}" target="_blank">/{{ slug }}</a>
+      <div class="hint">Share this link with your customers to access the chatbot</div>
+    </div>
+<button type="button" onclick="makeQR()">Make QR</button><div id="qrBox" style="margin-top:15px;"></div>
+    <button type="button" onclick="downloadQR()">Download QR</button>
+  </div>
+
+</div>
+  <script>
+
+let qr;
+
+function makeQR() {
+    let base = "https://ai-faq-chatbot-for-businesses.onrender.com/";
+    let slug = "{{ slug }}";  // from Flask template
+    let url = base + slug;
+
+    document.getElementById("qrBox").innerHTML = "";
+
+    new QRCode(document.getElementById("qrBox"), {
+        text: url,
+        width: 180,
+        height: 180
+    });
+}
+function downloadQR() {
+    let img = document.querySelector("#qrBox img");
+
+    if (!img) {
+        alert("Generate QR first!");
+        return;
+    }
+
+    let link = document.createElement("a");
+    link.href = img.src;
+    link.download = "{{ slug }}-qr.png";
+    link.click();
+}
+
+</script>
 </body>
 </html>

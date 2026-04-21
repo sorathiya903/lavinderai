@@ -68,11 +68,12 @@ def chat_api(slug):
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
+        email = request.form.get("email")
         name = request.form.get("name")
         slug = (request.form.get("slug") or "").lower().replace(" ", "-")
         content = request.form.get("content")
         secret_key = secrets.token_hex(8)
-        if not name or not content:
+        if not name or not content or email:
             return "<h3>❌ All fields are required</h3>"
 
         if not slug:

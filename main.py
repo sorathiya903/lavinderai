@@ -23,9 +23,10 @@ def send_email(to_email, slug, secret_key):
         "subject": "Your Chatbot is Ready 🚀",
         "html": f"""
         <h2>Your chatbot is ready!</h2>
+        
         <p><b>Public URL:</b> {public_url}</p>
         <p><b>Dashboard:</b> {dashboard_url}</p>
-        <p style="color:red;">Save this link safely.</p>
+         <p style="color:red;">Save this link safely.</p>
         """
     }
 
@@ -117,10 +118,12 @@ def home():
         send_email(email, slug, secret_key)
 
         return f"""
-        <h3>✅ Chatbot Created!</h3>
+        <h2>✅ Chatbot Created!</h2>
         <p><b>Public URL:</b> <a href="/{slug}" target="_blank">/{slug}</a></p>
         <p><b>Dashboard:</b>
         <a href="/dashboard/{slug}?key={secret_key}" target="_blank">/dashboard/{slug}?key={secret_key}</a></p>
+        <h3>These both the details are emailed to {email}</h3>
+       
         <p style="color:red;">⚠️ Save this link!</p>
         """
 

@@ -32,19 +32,28 @@ function send() {
 
   let reply = "Sorry, I don't understand.";
 
-  if (msg.toLowerCase().includes("hello")) {
-    reply = "Hello! Welcome to {{ data.name }}";
-  }
+  async function send() {
+    let msg = document.getElementById("msg").value;
 
-  if (msg.toLowerCase().includes("info")) {
-    reply = "{{ data.content }}";
-  }
+    document.getElementById("chat").innerHTML += "<p><b>You:</b> " + msg + "</p>";
 
-  let bot = "<p><b>Bot:</b> " + reply + "</p>";
-  box.innerHTML += bot;
+    let res = await fetch("/api/chat/{{ slug }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: msg })
+    });
 
-  document.getElementById("msg").value = "";
+    let data = await res.json();
+
+    document.getElementById("chat").innerHTML += "<p><b>Bot:</b> " + data.reply + "</p>";
+
+    document.getElementById("msg").value = "";
 }
+
+  
+
 </script>
 
 </body>

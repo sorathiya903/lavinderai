@@ -102,7 +102,7 @@ def home():
         slug = (request.form.get("slug") or "").lower().replace(" ", "-")
         content = request.form.get("content")
         secret_key = secrets.token_hex(8)
-        if not name or not content or email:
+        if not name or not content or not email:
             return "<h3>❌ All fields are required</h3>"
 
         if not slug:

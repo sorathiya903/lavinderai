@@ -17,7 +17,9 @@ def ask_groq(system_prompt, user_msg):
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_msg}
-        ]
+        ],
+        "temperature": 0.3,
+        "max_tokens": 90
     }
 
     res = requests.post(url, headers=headers, json=data)
@@ -41,10 +43,13 @@ def chat_api(slug):
         return {"reply": "Chatbot not found"}
 
     user_msg = request.json.get("message")
-
-    # 🧠 Use DB content as system prompt
-    system_prompt = data.get("content", "You are a helpful assistant.")
-
+    system_prompt = data.get("content", "") + """
+    Rules:
+        - Always give short and concise answers (max 2-3 lines)
+        - Do NOT use markdown, no bullet points, no formatting
+        - Use plain simple text only
+        - Only give long answers if the user explicitly asks for "explain" or "details"
+        """
     # 🤖 Get AI reply
     reply = ask_groq(system_prompt, user_msg)
 

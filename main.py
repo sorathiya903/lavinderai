@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect
-from utils.firebase import save_data, get_data
+from HelperFunctions.firebase import save_data, get_data
 
 app = Flask(__name__)
 

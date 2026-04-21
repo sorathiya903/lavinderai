@@ -89,7 +89,7 @@ def chatbot(slug):
     if not data:
         return "Not found"
 
-    return render_template("chatbot.html", data=data or {})
+    return render_template("chatbot.html", data=data or {}, slug=slug)
 
 
 @app.route("/dashboard/<slug>", methods=["GET", "POST"])

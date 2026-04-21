@@ -174,20 +174,40 @@ function makeQR() {
     new QRCode(document.getElementById("qrBox"), {
         text: url,
         width: 180,
-        height: 180
+        height: 180,
+        colorDark: "#000000",   // QR color (black)
+        colorLight: "#ffffff",  // background (white)
+        correctLevel: QRCode.CorrectLevel.H
     });
 }
-function downloadQR() {
-    let img = document.querySelector("#qrBox img");
 
-    if (!img) {
+function downloadQR() {
+    let qrBox = document.querySelector("#qrBox");
+
+    if (!qrBox) {
         alert("Generate QR first!");
         return;
     }
 
+    let img = qrBox.querySelector("img");
+
+    // QRCode library sometimes renders canvas instead of img
+    let canvas = qrBox.querySelector("canvas");
+
+    let dataURL;
+
+    if (canvas) {
+        dataURL = canvas.toDataURL("image/png");
+    } else if (img) {
+        dataURL = img.src;
+    } else {
+        alert("QR not found!");
+        return;
+    }
+
     let link = document.createElement("a");
-    link.href = img.src;
-    link.download = "{{ slug }}-qr.png";
+    link.href = dataURL;
+    link.download = "chatbot-qr.png";
     link.click();
 }
 

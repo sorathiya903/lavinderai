@@ -149,39 +149,41 @@ def chatbot(slug):
 
 # ---------------- DASHBOARD ----------------
 
-@app.route("/dashboard/<slug>", methods=["GET", "POST"])
-def dashboard(slug):
+@app.route("/dashboard", methods=["GET", "POST"])
+def dashboard():
 
-    all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
+    email = request.args.get("email")
+    email_key = email.replace(".", "_")
 
-    user_email = None
-    bot_data = None
+    user = get_user(email_key)
 
-    # find chatbot
-    for email, user in all_users.items():
-        if slug in user.get("chatbots", {}):
-            user_email = email
-            bot_data = user["chatbots"][slug]
-            break
+    if not user:
+        return "User not found"
 
-    if not bot_data:
-        return "Not found"
+    edit_slug = request.args.get("edit")
 
-    user_key = request.args.get("key")
+    if request.method == "POST" and edit_slug:
 
-    if user_key != bot_data.get("secret"):
-        return "Unauthorized"
+        user["chatbots"][edit_slug]["name"] = request.form.get("name")
+        user["chatbots"][edit_slug]["content"] = request.form.get("content")
 
-    if request.method == "POST":
-        bot_data["name"] = request.form.get("name")
-        bot_data["content"] = request.form.get("content")
+        save_user(email_key, user)
 
-        all_users[user_email]["chatbots"][slug] = bot_data
-        save_user(user_email, all_users[user_email])
+        return redirect(f"/dashboard?email={email}")
 
-        return redirect(f"/dashboard/{slug}?key={user_key}")
+    edit_bot = None
+    if edit_slug:
+        edit_bot = user["chatbots"].get(edit_slug)
 
-    return render_template("dashboard.html", data=bot_data, slug=slug)
+    return render_template(
+        "dashboard.html",
+        user=user,
+        chatbots=user.get("chatbots", {}),
+        email=email,
+        edit_bot=edit_bot,
+        edit_slug=edit_slug
+    )
+
 
 
 # ---------------- LAUNCH (PAY ₹50) ----------------

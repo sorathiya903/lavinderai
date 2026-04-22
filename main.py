@@ -80,9 +80,7 @@ def landing():
 def terms():
     return render_template("terms.html")
 
-
 # ---------------- CREATE CHATBOT ----------------
-
 @app.route("/create", methods=["GET", "POST"])
 def create():
     if request.method == "POST":
@@ -105,7 +103,7 @@ def create():
         }
 
         if slug in user["chatbots"]:
-            return "Chatbot already exists"
+            return "Slug already exists"
 
         user["chatbots"][slug] = {
             "name": name,
@@ -116,25 +114,46 @@ def create():
         }
 
         save_user(email_key, user)
-        send_email(email, slug, secret_key)
 
         return f"""
         <h2>Chatbot Created</h2>
-        <p>Public: <a href="/{slug}">/{slug}</a></p>
-        <p>Dashboard: <a href="/dashboard/{slug}?key={secret_key}">Open</a></p>
+        <p>Dashboard: /dashboard?email={email}</p>
+        <p>Public: /{slug}</p>
+        <p>Launch: /launch/{email}/{slug}</p>
         """
 
     return render_template("index.html")
 
 
-# ---------------- PUBLIC CHATBOT ----------------
+# ---------------- DASHBOARD (MAIN CONTROL PANEL) ----------------
+@app.route("/dashboard")
+def dashboard():
 
+    email = request.args.get("email")
+    email_key = email.replace(".", "_")
+
+    user = get_user(email_key)
+
+    if not user:
+        return "User not found"
+
+    return render_template(
+        "dashboard.html",
+        email=email,
+        chatbots=user.get("chatbots", {})
+    )
+
+
+# ---------------- PUBLIC CHATBOT ----------------
 @app.route("/<slug>")
 def chatbot(slug):
 
+    from HelperFunctions.firebase import FIREBASE_URL
+    import requests
+
     all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
 
-    for email, user in all_users.items():
+    for user in all_users.values():
         for s, bot in user.get("chatbots", {}).items():
 
             if s == slug:
@@ -147,47 +166,7 @@ def chatbot(slug):
     return "Not found"
 
 
-# ---------------- DASHBOARD ----------------
-
-@app.route("/dashboard", methods=["GET", "POST"])
-def dashboard():
-
-    email = request.args.get("email")
-    email_key = email.replace(".", "_")
-
-    user = get_user(email_key)
-
-    if not user:
-        return "User not found"
-
-    edit_slug = request.args.get("edit")
-
-    if request.method == "POST" and edit_slug:
-
-        user["chatbots"][edit_slug]["name"] = request.form.get("name")
-        user["chatbots"][edit_slug]["content"] = request.form.get("content")
-
-        save_user(email_key, user)
-
-        return redirect(f"/dashboard?email={email}")
-
-    edit_bot = None
-    if edit_slug:
-        edit_bot = user["chatbots"].get(edit_slug)
-
-    return render_template(
-        "dashboard.html",
-        user=user,
-        chatbots=user.get("chatbots", {}),
-        email=email,
-        edit_bot=edit_bot,
-        edit_slug=edit_slug
-    )
-
-
-
 # ---------------- LAUNCH (PAY ₹50) ----------------
-
 @app.route("/launch/<email>/<slug>", methods=["GET", "POST"])
 def launch(email, slug):
 
@@ -200,6 +179,8 @@ def launch(email, slug):
     bot = user["chatbots"][slug]
 
     if request.method == "POST":
+
+        # payment success (mock)
         bot["is_paid"] = True
         bot["is_live"] = True
 
@@ -209,13 +190,12 @@ def launch(email, slug):
 
     return f"""
     <h2>Launch {bot['name']}</h2>
-    <p>Pay ₹50 to publish chatbot</p>
+    <p>Pay ₹50 to make chatbot live</p>
+
     <form method="POST">
-        <button>Pay ₹50 & Launch</button>
+        <button>Pay & Launch</button>
     </form>
     """
-
-
 # ---------------- RUN ----------------
 
 if __name__ == "__main__":

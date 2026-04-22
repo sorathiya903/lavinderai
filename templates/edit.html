@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6fb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.card {
+  width: 100%;
+  max-width: 500px;
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+h2 {
+  margin-bottom: 20px;
+  color: #6c5ce7;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #5a4ad1;
+}
+
+.back {
+  display: inline-block;
+  margin-top: 15px;
+  text-decoration: none;
+  color: #6c5ce7;
+  font-weight: bold;
+}
+
+.top {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 13px;
+  color: #888;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="top">Edit your chatbot settings</div>
+
+  <h2>✏️ Edit Chatbot</h2>
+
+  <form method="POST">
+
+    <input 
+      name="name" 
+      value="{{ data.name }}" 
+      placeholder="Chatbot Name"
+      required>
+
+    <textarea 
+      name="content" 
+      placeholder="Enter chatbot instructions..."
+      required>{{ data.content }}</textarea>
+
+    <button type="submit">Update Chatbot</button>
+
+  </form>
+
+  <a class="back" href="/dashboard?email={{ email }}">⬅ Back to Dashboard</a>
+
+</div>
+
+</body>
+</html>

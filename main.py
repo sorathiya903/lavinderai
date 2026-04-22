@@ -137,8 +137,7 @@ def create():
         print("USER SAVED SUCCESSFULLY")
 
         send_email(email, slug, user["chatbots"][slug]["secret"])
-
-        return f"Created {slug}"
+        return f"""  <h2>Chatbot Created Successfully 🚀</h2><p><b>Slug:</b> {slug}</p><p><b>Public URL:</b> <a href="/{slug}" target="_blank">/{slug}</a></p><p><b>Dashboard URL:</b> <a href="/dashboard?email={email}" target="_blank">/dashboard?email={email}</a></p>"""
 
     return render_template("index.html")
 
@@ -165,7 +164,7 @@ def dashboard():
     return render_template(
         "dashboard.html",
         email=email,
-        chatbots=user.get("chatbots", {}),data=data
+        chatbots=user.get("chatbots", {})
     )
 
 

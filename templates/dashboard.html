@@ -1,216 +1,247 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ data.name }}</title>
 
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f7f6fb;
-    color: #222;
-  }
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #f7f6fb;
+  color: #222;
+}
 
-  /* Top bar */
-  .topbar {
-    background: white;
-    padding: 18px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #eee;
-  }
+.topbar {
+  background: white;
+  padding: 18px 30px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+}
 
-  .logo {
-    font-size: 20px;
-    font-weight: bold;
-    color: #7c4dff;
-  }
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #7c4dff;
+}
 
-  .slug {
-    font-size: 13px;
-    color: #777;
-  }
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+}
 
-  /* Main container */
-  .container {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 20px;
-  }
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 25px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
 
-  /* Card */
-  .card {
-    background: white;
-    border-radius: 14px;
-    padding: 25px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  }
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
 
-  .card h2 {
-    margin-bottom: 18px;
-    color: #333;
-  }
+.live { background: #d4f8e8; color: green; }
+.notlive { background: #ffe0e0; color: red; }
 
-  /* Inputs */
-  input, textarea {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    font-size: 14px;
-    outline: none;
-    transition: 0.2s;
-  }
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
 
-  input:focus, textarea:focus {
-    border-color: #7c4dff;
-    box-shadow: 0 0 0 3px rgba(124,77,255,0.1);
-  }
+button {
+  background: #7c4dff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+}
 
-  textarea {
-    min-height: 120px;
-    resize: vertical;
-  }
+button:hover { background: #6a3df0; }
 
-  /* Button */
-  button {
-    background: #7c4dff;
-    color: white;
-    border: none;
-    padding: 12px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 15px;
-    margin-top: 10px;
-    transition: 0.2s;
-  }
+.link-box {
+  margin-top: 20px;
+  background: #f1efff;
+  padding: 15px;
+  border-radius: 10px;
+}
 
-  button:hover {
-    background: #6a3df0;
-  }
+a {
+  color: #7c4dff;
+  font-weight: bold;
+  text-decoration: none;
+}
 
-  /* Link box */
-  .link-box {
-    margin-top: 20px;
-    background: #f1efff;
-    padding: 15px;
-    border-radius: 10px;
-    border-left: 4px solid #7c4dff;
-  }
-
-  .link-box a {
-    color: #7c4dff;
-    font-weight: bold;
-    text-decoration: none;
-  }
-
-  /* Footer hint */
-  .hint {
-    font-size: 13px;
-    color: #777;
-    margin-top: 10px;
-  }
-
-  /* Responsive */
-  @media (max-width: 600px) {
-    .container {
-      margin: 20px auto;
-      padding: 10px;
-    }
-  }
+#qrBox {
+  margin-top: 15px;
+  background: white;
+  display: inline-block;
+  padding: 10px;
+  border-radius: 10px;
+}
 </style>
 </head>
 
 <body>
 
-<!-- Top Bar -->
 <div class="topbar">
   <div class="logo">{{ data.name }}</div>
-  <div class="slug">Manage your chatbot</div>
+  <div>
+    {% if data.is_live %}
+      <span class="badge live">LIVE</span>
+    {% else %}
+      <span class="badge notlive">NOT LIVE</span>
+    {% endif %}
+  </div>
+</div>
+<!-- CREATE BUTTON -->
+
+  <div class="container">
+    
+  <div class="card">
+<!-- LIST ALL CHATBOTS -->
+<h3 style="display:flex;flex-direction:row;justify-content:space-between;align-items:center">Your Chatbots
+  <div style="margin-bottom:10px;">
+  <a href="/create">
+    <button>+</button>
+  </a>
+</div></h3>
+
+{% for s, bot in user.chatbots.items() %}
+
+<div style="background:white; padding:10px; margin:10px 0; border-radius:10px; border:1px solid #eee;">
+  
+  <b>{{ bot.name }}</b><br>
+  <small>/{{ s }}</small><br>
+
+  {% if bot.is_live %}
+    <span style="color:green;">LIVE</span>
+  {% else %}
+    <span style="color:red;">NOT LIVE</span>
+  {% endif %}
+
+  
+  <br><br>
+
+  <a href="/dashboard/{{ s }}?key={{ bot.secret }}">
+    <button>Edit</button>
+  </a>
+
+  <a href="/launch/{{ email }}/{{ s }}">
+    <button>Launch ₹50</button>
+  </a>
+
+  <a href="/{{ s }}" target="_blank">
+    <button>Open</button>
+  </a>
+
 </div>
 
-<!-- Main -->
+{% endfor %}
+  </div>
+  </div>
 <div class="container">
 
-  <div class="card">
+<div class="card">
 
-    <h2>Edit Chatbot</h2>
+<h2>Edit Chatbot</h2>
 
-    <form method="POST">
+<form method="POST">
+  <input name="name" value="{{ data.name }}" required>
+  <textarea name="content">{{ data.content }}</textarea>
+  <button type="submit">Update</button>
+</form>
 
-      <input name="name" value="{{ data.name }}" required>
+<hr>
 
-      <textarea name="content">{{ data.content }}</textarea>
+<div class="link-box">
+  <p>Public Link:</p>
+  <a href="/{{ slug }}" target="_blank">/{{ slug }}</a>
+</div>
 
-      <button type="submit">Update</button>
+<!-- QR -->
+<h3>QR Code</h3>
 
-    </form>
+<button type="button" onclick="makeQR()">Make QR</button>
+<button type="button" onclick="downloadQR()">Download QR</button>
 
-    <div class="link-box">
-      <p>Public Link:</p>
-      <a href="/{{ slug }}" target="_blank">/{{ slug }}</a>
-      <div class="hint">Share this link with your customers to access the chatbot</div>
-    </div>
-<button type="button" onclick="makeQR()">Make QR</button><div id="qrBox" style="margin-top:15px;"></div>
-    <button type="button" onclick="downloadQR()">Download QR</button>
-  </div>
+<div id="qrBox"></div>
+
+<hr>
+
+<!-- 🚀 NEW LAUNCH BUTTON -->
+<h3>Launch Chatbot</h3>
+
+<p>Make your chatbot live for users</p>
+
+<form method="POST" action="/launch/{{ email }}/{{ slug }}">
+  <button type="submit">Pay ₹50 & Launch</button>
+</form>
 
 </div>
-  <script>
 
-let qr;
+</div>
+
+<script>
 
 function makeQR() {
     let base = "https://ai-faq-chatbot-for-businesses.onrender.com/";
-    let slug = "{{ slug }}";  // from Flask template
-    let url = base + slug;
+    let url = base + "{{ slug }}";
 
-    document.getElementById("qrBox").innerHTML = "";
+    let box = document.getElementById("qrBox");
+    box.innerHTML = "";
 
-    new QRCode(document.getElementById("qrBox"), {
+    new QRCode(box, {
         text: url,
         width: 180,
         height: 180,
-        colorDark: "#000000",   // QR color (black)
-        colorLight: "#ffffff",  // background (white)
+        colorDark: "#000",
+        colorLight: "#fff",
         correctLevel: QRCode.CorrectLevel.H
     });
 }
 
 function downloadQR() {
-    let qrBox = document.querySelector("#qrBox");
+    let box = document.getElementById("qrBox");
 
-    if (!qrBox) {
-        alert("Generate QR first!");
-        return;
-    }
-
-    let img = qrBox.querySelector("img");
-
-    // QRCode library sometimes renders canvas instead of img
-    let canvas = qrBox.querySelector("canvas");
+    let canvas = box.querySelector("canvas");
+    let img = box.querySelector("img");
 
     let dataURL;
 
     if (canvas) {
         dataURL = canvas.toDataURL("image/png");
     } else if (img) {
-        dataURL = img.src;
+        let c = document.createElement("canvas");
+        c.width = img.width;
+        c.height = img.height;
+        c.getContext("2d").drawImage(img, 0, 0);
+        dataURL = c.toDataURL("image/png");
     } else {
-        alert("QR not found!");
+        alert("Generate QR first!");
         return;
     }
 
-    let link = document.createElement("a");
-    link.href = dataURL;
-    link.download = "chatbot-qr.png";
-    link.click();
+    let a = document.createElement("a");
+    a.href = dataURL;
+    a.download = "chatbot-qr.png";
+    a.click();
 }
 
 </script>
+
 </body>
-</html>
+    </html>

@@ -9,6 +9,19 @@ app = Flask(__name__)
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 FIREBASE_URL = os.getenv("FIREBASE_URL")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+instructions ="""You are a helpful AI assistant for a business.
+
+Rules you must always follow:
+- Give very short answers (maximum 2–3 lines).
+- Do NOT use markdown, bullets, headings, or formatting of any kind.
+- Respond in plain simple text only.
+- Do NOT explain external concepts like APIs, CPUs, servers, frameworks, or technical internals unless the user explicitly asks "explain in detail".
+- If the user asks general questions, answer only the direct point without extra information.
+- Avoid long explanations, background details, or examples unless requested.
+- Keep responses natural, direct, and minimal.
+- Answer correctly from the given information
+\n
+"""
 
 
 # ---------------- SAFE HELPERS ----------------
@@ -298,7 +311,7 @@ def launch(email, slug):
     """
 
 
-# ---------------- API CHAT (FIXED) ----------------
+# ---------------- API CHAT ----------------
 
 @app.route("/api/chat/<slug>", methods=["POST"])
 def chat_api(slug):
@@ -321,8 +334,8 @@ def chat_api(slug):
     if not msg:
         return jsonify({"reply": "Empty message"})
 
-    system_prompt = data.get("content", "")
-
+    info = data.get("content", "")
+    system_prompt = instructions + info
     reply = ask_groq(system_prompt, msg)
 
     return jsonify({"reply": reply})

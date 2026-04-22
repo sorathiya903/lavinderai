@@ -94,6 +94,76 @@ def ask_groq(system_prompt, user_msg):
 def landing():
     return render_template("landing.html")
 
+@app.route("/delete/<slug>", methods=["POST"])
+def delete_chatbot(slug):
+
+    email = request.args.get("email")
+
+    if not email:
+        return "❌ Email missing"
+
+    email_key = safe_email_key(email)
+    user = get_user(email_key)
+
+    if not user:
+        return "❌ User not found"
+
+    chatbots = user.get("chatbots", {})
+
+    if slug not in chatbots:
+        return "❌ Chatbot not found"
+
+    print("🗑️ DELETING:", slug)
+
+    del chatbots[slug]
+
+    save_user(email_key, user)
+
+    return redirect(f"/dashboard?email={email}")
+
+@app.route("/edit/<slug>", methods=["GET", "POST"])
+def edit_chatbot(slug):
+
+    email = request.args.get("email")
+
+    if not email:
+        return "❌ Email missing"
+
+    email_key = safe_email_key(email)
+    user = get_user(email_key)
+
+    if not user:
+        return "❌ User not found"
+
+    bot = user.get("chatbots", {}).get(slug)
+
+    if not bot:
+        return "❌ Chatbot not found"
+
+    if request.method == "POST":
+
+        name = request.form.get("name")
+        content = request.form.get("content")
+
+        if not name or not content:
+            return "❌ Fields cannot be empty"
+
+        bot["name"] = name
+        bot["content"] = content
+
+        save_user(email_key, user)
+
+        print("✅ UPDATED BOT:", slug)
+
+        return redirect(f"/dashboard?email={email}")
+
+    return render_template(
+        "edit.html",
+        email=email,
+        slug=slug,
+        data=bot
+    )
+
 
 @app.route("/create", methods=["GET", "POST"])
 def create():

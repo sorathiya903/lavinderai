@@ -80,6 +80,26 @@ def landing():
 def terms():
     return render_template("terms.html")
 
+@app.route("/api/chat/<slug>", methods=["POST"])
+def chat_api(slug):
+    data = get_data(slug)
+
+    if not data:
+        return {"reply": "Chatbot not found"}
+
+    user_msg = request.json.get("message")
+    system_prompt = data.get("content", "") + """
+    Rules:
+        - Always give short and concise answers (max 2-3 lines)
+        - Do NOT use markdown, no bullet points, no formatting
+        - Use plain simple text only
+        - Only give long answers if the user explicitly asks for "explain" or "details"
+        """
+    # 🤖 Get AI reply
+    reply = ask_groq(system_prompt, user_msg)
+
+    return jsonify({"reply": reply})
+
 # ---------------- CREATE CHATBOT ----------------
 @app.route("/create", methods=["GET", "POST"])
 def create():

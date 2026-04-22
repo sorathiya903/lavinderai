@@ -118,13 +118,26 @@ def home():
             return "<h3>❌ Please enter a valid endpoint name</h3>"
         if get_data(slug):
             return "<h3>❌ This chatbot link is already in use. Please choose a unique name.</h3>"
-		save_data(slug, {
-   	 "name": name,
-   	 "content": content,
-	    "secret": secret_key,
-	    "is_paid": False,
-	    "is_live": False
-		})
+
+		email_key = email.replace(".", "_")
+
+        user = get_user(email) or {
+        "name": name,
+        "email": email,
+        "chatbots": {}
+        }
+
+        user["chatbots"][slug] = {
+        "name": name,
+        "content": content,
+        "secret": secret_key,
+        "is_paid": False,
+        "is_live": False
+        }
+
+        save_user(email, user)
+	
+   	 
         send_email(email, slug, secret_key)
 
         return f"""
@@ -141,39 +154,47 @@ def home():
 
 @app.route("/<slug>")
 def chatbot(slug):
-    data = get_data(slug)
 
-    if not data:
-        return "Not found"
+    # search all users
+    # (simple loop version)
 
-    if not data.get("is_live"):
-        return "⚠️ This chatbot is not published yet"
+    all_users = requests.get(f"{FIREBASE_URL}/users.json").json()
 
-    return render_template("chatbot.html", data=data or {}, slug=slug)
+    for email, user in (all_users or {}).items():
+        for s, bot in user.get("chatbots", {}).items():
 
-@app.route("/launch/<slug>", methods=["GET", "POST"])
-def launch(slug):
-    data = get_data(slug)
+            if s == slug:
 
-    if not data:
-        return "Not found"
+                if not bot.get("is_live"):
+                    return "Not published yet"
+
+                return render_template("chatbot.html", data=bot, slug=slug)
+
+    return "Not found"
+
+
+@app.route("/launch/<email>/<slug>", methods=["GET", "POST"])
+def launch(email, slug):
+
+    user = get_user(email.replace(".", "_"))
+    bot = user["chatbots"][slug]
 
     if request.method == "POST":
-        data["is_paid"] = True
-        data["is_live"] = True
-        save_data(slug, data)
+        bot["is_paid"] = True
+        bot["is_live"] = True
+
+        save_user(email, user)
 
         return redirect(f"/{slug}")
 
     return f"""
-    <h2>Launch Chatbot</h2>
-    <p>{data['name']} will go live after payment</p>
+    <h2>Launch {bot['name']}</h2>
+    <p>Pay ₹50 to make chatbot live</p>
 
     <form method="POST">
         <button>Pay ₹50 & Launch</button>
     </form>
     """
-    
 
 @app.route("/dashboard/<slug>", methods=["GET", "POST"])
 def dashboard(slug):
@@ -203,7 +224,7 @@ def dashboard(slug):
 
         return redirect(f"/dashboard/{slug}?key={user_key}")
 
-    return render_template("dashboard.html", data=data, slug=slug)
+    return render_template("dashboard.html", data=data, slug=slug, email=email)
 
 
 if __name__ == "__main__":

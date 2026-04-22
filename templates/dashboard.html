@@ -95,105 +95,112 @@ a {
 </style>
 </head>
 
+
+
 <body>
 
 <div class="topbar">
   <div class="logo">Chatbot Dashboard</div>
+
   <div>
-    {% if data.is_live %}
+    {% if data and data.is_live %}
       <span class="badge live">LIVE</span>
     {% else %}
       <span class="badge notlive">NOT LIVE</span>
     {% endif %}
   </div>
 </div>
-<!-- CREATE BUTTON -->
 
-  <div class="container">
-    
+<div class="container">
+  
   <div class="card">
-<!-- LIST ALL CHATBOTS -->
-<h3 style="display:flex;flex-direction:row;justify-content:space-between;align-items:center">Your Chatbots
-  <div style="margin-bottom:10px;">
-  <a href="/create">
-    <button>+</button>
-  </a>
-</div></h3>
 
-{% for s, bot in user.chatbots.items() %}
+    <!-- LIST ALL CHATBOTS -->
+    <h3 style="display:flex;justify-content:space-between;align-items:center">
+      Your Chatbots
 
-<div style="background:white; padding:10px; margin:10px 0; border-radius:10px; border:1px solid #eee;">
-  
-  <b>{{ bot.name }}</b><br>
-  <small>/{{ s }}</small><br>
+      <div style="margin-bottom:10px;">
+        <a href="/create">
+          <button>+</button>
+        </a>
+      </div>
+    </h3>
 
-  {% if bot.is_live %}
-    <span style="color:green;">LIVE</span>
-  {% else %}
-    <span style="color:red;">NOT LIVE</span>
-  {% endif %}
+    {% for s, bot in user.chatbots.items() %}
 
-  
-  <br><br>
+    <div style="background:white; padding:10px; margin:10px 0; border-radius:10px; border:1px solid #eee;">
+      
+      <b>{{ bot.name }}</b><br>
+      <small>/{{ s }}</small><br>
 
-  <a href="/dashboard/{{ s }}?key={{ bot.secret }}">
-    <button>Edit</button>
-  </a>
+      {% if bot.is_live %}
+        <span style="color:green;">LIVE</span>
+      {% else %}
+        <span style="color:red;">NOT LIVE</span>
+      {% endif %}
 
-  <a href="/launch/{{ email }}/{{ s }}">
-    <button>Launch ₹50</button>
-  </a>
+      <br><br>
 
-  <a href="/{{ s }}" target="_blank">
-    <button>Open</button>
-  </a>
+      <a href="/dashboard/{{ s }}?email={{ email }}">
+        <button>Edit</button>
+      </a>
 
+      <a href="/launch/{{ email }}/{{ s }}">
+        <button>Launch ₹50</button>
+      </a>
+
+      <a href="/{{ s }}" target="_blank">
+        <button>Open</button>
+      </a>
+
+    </div>
+
+    {% endfor %}
+
+  </div>
 </div>
 
-{% endfor %}
-  </div>
-  </div>
+{% if data %}
 <div class="container">
 
-<div class="card">
+  <div class="card">
 
-<h2>Edit Chatbot</h2>
+    <h2>Edit Chatbot</h2>
 
-<form method="POST">
-  <input name="name" value="{{ data.name }}" required>
-  <textarea name="content">{{ data.content }}</textarea>
-  <button type="submit">Update</button>
-</form>
+    <form method="POST">
+      <input name="name" value="{{ data.name }}" required>
+      <textarea name="content">{{ data.content }}</textarea>
+      <button type="submit">Update</button>
+    </form>
 
-<hr>
+    <hr>
 
-<div class="link-box">
-  <p>Public Link:</p>
-  <a href="/{{ slug }}" target="_blank">/{{ slug }}</a>
-</div>
+    <div class="link-box">
+      <p>Public Link:</p>
+      <a href="/{{ slug }}" target="_blank">/{{ slug }}</a>
+    </div>
 
-<!-- QR -->
-<h3>QR Code</h3>
+    <h3>QR Code</h3>
 
-<button type="button" onclick="makeQR()">Make QR</button>
-<button type="button" onclick="downloadQR()">Download QR</button>
+    <button type="button" onclick="makeQR()">Make QR</button>
+    <button type="button" onclick="downloadQR()">Download QR</button>
 
-<div id="qrBox"></div>
+    <div id="qrBox"></div>
 
-<hr>
+    <hr>
 
-<!-- 🚀 NEW LAUNCH BUTTON -->
-<h3>Launch Chatbot</h3>
+    <h3>Launch Chatbot</h3>
+    <p>Make your chatbot live for users</p>
 
-<p>Make your chatbot live for users</p>
+    <form method="POST" action="/launch/{{ email }}/{{ slug }}">
+      <button type="submit">Pay ₹50 & Launch</button>
+    </form>
 
-<form method="POST" action="/launch/{{ email }}/{{ slug }}">
-  <button type="submit">Pay ₹50 & Launch</button>
-</form>
-
-</div>
+  </div>
 
 </div>
+{% endif %}
+
 
 <script>
 

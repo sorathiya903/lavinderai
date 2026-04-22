@@ -73,6 +73,10 @@ app = Flask(__name__)
 def favicon():
     return "", 204
 
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
 @app.route("/api/chat/<slug>", methods=["POST"])
 def chat_api(slug):
     data = get_data(slug)

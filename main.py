@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, redirect, jsonify, render_template_string
-from HelperFunctions.firebase import save_data, get_data, get_user, save_user
+from flask import Flask, render_template, request, redirect, jsonify
+from HelperFunctions.firebase import get_user, save_user
 import secrets
 import os
 import requests
@@ -7,11 +7,26 @@ import requests
 app = Flask(__name__)
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
-FIREBASE_URL = os.environ.get("FIREBASE_URL")
+FIREBASE_URL = os.getenv("FIREBASE_URL")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+
+# ---------------- SAFE HELPERS ----------------
+
+def safe_email_key(email):
+    if not email:
+        print("❌ email is None")
+        return None
+    return email.replace(".", "_")
+
 
 # ---------------- EMAIL ----------------
 
 def send_email(to_email, slug, secret_key):
+    if not to_email:
+        print("❌ send_email: missing email")
+        return
+
     url = "https://api.resend.com/emails"
 
     headers = {
@@ -20,33 +35,36 @@ def send_email(to_email, slug, secret_key):
     }
 
     public_url = f"https://ai-faq-chatbot-for-businesses.onrender.com/{slug}"
-    dashboard_url = f"https://ai-faq-chatbot-for-businesses.onrender.com/dashboard/{slug}?key={secret_key}"
+    dashboard_url = f"https://ai-faq-chatbot-for-businesses.onrender.com/dashboard?email={to_email}"
 
     data = {
         "from": "onboarding@resend.dev",
         "to": [to_email],
-        "subject": "Your Chatbot is Ready 🚀",
+        "subject": "Chatbot Ready 🚀",
         "html": f"""
-        <h2>Your chatbot is ready!</h2>
-        <p><b>Public URL:</b> {public_url}</p>
-        <p><b>Dashboard:</b> {dashboard_url}</p>
-        <p style="color:red;">Save this link safely.</p>
+        <h2>Chatbot Ready</h2>
+        <p>Public: {public_url}</p>
+        <p>Dashboard: {dashboard_url}</p>
         """
     }
 
     try:
-        requests.post(url, headers=headers, json=data)
-    except:
-        pass
+        r = requests.post(url, headers=headers, json=data)
+        print("EMAIL STATUS:", r.status_code, r.text)
+    except Exception as e:
+        print("EMAIL ERROR:", e)
 
 
-# ---------------- AI (optional) ----------------
+# ---------------- AI ----------------
 
 def ask_groq(system_prompt, user_msg):
+    if not user_msg:
+        return "Empty message received"
+
     url = "https://api.groq.com/openai/v1/chat/completions"
 
     headers = {
-        "Authorization": f"Bearer {os.getenv('GROQ_API_KEY')}",
+        "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json"
     }
 
@@ -60,12 +78,13 @@ def ask_groq(system_prompt, user_msg):
         "max_tokens": 90
     }
 
-    res = requests.post(url, headers=headers, json=data)
-    result = res.json()
-
     try:
+        res = requests.post(url, headers=headers, json=data)
+        print("GROQ STATUS:", res.status_code)
+        result = res.json()
         return result["choices"][0]["message"]["content"]
-    except:
+    except Exception as e:
+        print("GROQ ERROR:", e)
         return "AI error"
 
 
@@ -76,31 +95,6 @@ def landing():
     return render_template("landing.html")
 
 
-@app.route("/terms")
-def terms():
-    return render_template("terms.html")
-
-@app.route("/api/chat/<slug>", methods=["POST"])
-def chat_api(slug):
-    data = get_data(slug)
-
-    if not data:
-        return {"reply": "Chatbot not found"}
-
-    user_msg = request.json.get("message")
-    system_prompt = data.get("content", "") + """
-    Rules:
-        - Always give short and concise answers (max 2-3 lines)
-        - Do NOT use markdown, no bullet points, no formatting
-        - Use plain simple text only
-        - Only give long answers if the user explicitly asks for "explain" or "details"
-        """
-    # 🤖 Get AI reply
-    reply = ask_groq(system_prompt, user_msg)
-
-    return jsonify({"reply": reply})
-
-# ---------------- CREATE CHATBOT ----------------
 @app.route("/create", methods=["GET", "POST"])
 def create():
     if request.method == "POST":
@@ -109,12 +103,15 @@ def create():
         name = request.form.get("name")
         slug = (request.form.get("slug") or "").lower().replace(" ", "-")
         content = request.form.get("content")
-        secret_key = secrets.token_hex(8)
 
-        if not email or not name or not content:
-            return "All fields required"
+        print("CREATE REQUEST:", email, name, slug)
 
-        email_key = email.replace(".", "_")
+        if not email or not name or not content or not slug:
+            return "❌ Missing fields"
+
+        email_key = safe_email_key(email)
+        if not email_key:
+            return "❌ Invalid email"
 
         user = get_user(email_key) or {
             "name": name,
@@ -122,37 +119,45 @@ def create():
             "chatbots": {}
         }
 
-        if slug in user["chatbots"]:
-            return "Slug already exists"
+        print("USER BEFORE:", user)
+
+        if slug in user.get("chatbots", {}):
+            return "❌ Slug already exists"
 
         user["chatbots"][slug] = {
             "name": name,
             "content": content,
-            "secret": secret_key,
+            "secret": secrets.token_hex(8),
             "is_paid": False,
             "is_live": False
         }
 
         save_user(email_key, user)
 
-        return f"""
-        <h2>Chatbot Created</h2>
-        <p>Dashboard: /dashboard?email={email}</p>
-        <p>Public: /{slug}</p>
-        <p>Launch: /launch/{email}/{slug}</p>
-        """
+        print("USER SAVED SUCCESSFULLY")
+
+        send_email(email, slug, user["chatbots"][slug]["secret"])
+
+        return f"Created {slug}"
 
     return render_template("index.html")
 
 
-# ---------------- DASHBOARD (MAIN CONTROL PANEL) ----------------
+# ---------------- DASHBOARD ----------------
+
 @app.route("/dashboard")
 def dashboard():
 
     email = request.args.get("email")
-    email_key = email.replace(".", "_")
+    print("DASHBOARD EMAIL:", email)
+
+    email_key = safe_email_key(email)
+    if not email_key:
+        return "❌ Invalid email"
 
     user = get_user(email_key)
+
+    print("DASHBOARD USER:", user)
 
     if not user:
         return "User not found"
@@ -164,43 +169,49 @@ def dashboard():
     )
 
 
-# ---------------- PUBLIC CHATBOT ----------------
+# ---------------- CHATBOT FETCH (FIXED) ----------------
+
 @app.route("/<slug>")
 def chatbot(slug):
 
-    from HelperFunctions.firebase import FIREBASE_URL
-    import requests
+    print("LOOKUP SLUG:", slug)
 
     all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
 
-    for user in all_users.values():
-        for s, bot in user.get("chatbots", {}).items():
+    for email, user in all_users.items():
+        for s, bot in (user.get("chatbots") or {}).items():
 
             if s == slug:
+                print("FOUND BOT:", bot)
 
                 if not bot.get("is_live"):
                     return "Not published yet"
 
                 return render_template("chatbot.html", data=bot, slug=slug)
 
-    return "Not found"
+    print("BOT NOT FOUND")
+    return "Chatbot not found"
 
 
-# ---------------- LAUNCH (PAY ₹50) ----------------
+# ---------------- LAUNCH ----------------
+
 @app.route("/launch/<email>/<slug>", methods=["GET", "POST"])
 def launch(email, slug):
 
-    email_key = email.replace(".", "_")
+    email_key = safe_email_key(email)
     user = get_user(email_key)
 
-    if not user or slug not in user.get("chatbots", {}):
-        return "Not found"
+    if not user:
+        return "User not found"
 
-    bot = user["chatbots"][slug]
+    bot = user.get("chatbots", {}).get(slug)
+
+    if not bot:
+        return "Bot not found"
 
     if request.method == "POST":
+        print("LAUNCHING BOT:", slug)
 
-        # payment success (mock)
         bot["is_paid"] = True
         bot["is_live"] = True
 
@@ -210,13 +221,44 @@ def launch(email, slug):
 
     return f"""
     <h2>Launch {bot['name']}</h2>
-    <p>Pay ₹50 to make chatbot live</p>
-
     <form method="POST">
         <button>Pay & Launch</button>
     </form>
     """
+
+
+# ---------------- API CHAT (FIXED) ----------------
+
+@app.route("/api/chat/<slug>", methods=["POST"])
+def chat_api(slug):
+
+    data = None
+
+    all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
+
+    for user in all_users.values():
+        for s, bot in (user.get("chatbots") or {}).items():
+            if s == slug:
+                data = bot
+                break
+
+    if not data:
+        return jsonify({"reply": "Chatbot not found"})
+
+    msg = request.json.get("message")
+
+    if not msg:
+        return jsonify({"reply": "Empty message"})
+
+    system_prompt = data.get("content", "")
+
+    reply = ask_groq(system_prompt, msg)
+
+    return jsonify({"reply": reply})
+
+
 # ---------------- RUN ----------------
 
 if __name__ == "__main__":
+    print("🚀 Server starting...")
     app.run()

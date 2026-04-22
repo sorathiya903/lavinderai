@@ -165,7 +165,7 @@ def dashboard():
     return render_template(
         "dashboard.html",
         email=email,
-        chatbots=user.get("chatbots", {})
+        chatbots=user.get("chatbots", {}),data=data
     )
 
 

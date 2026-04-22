@@ -118,11 +118,13 @@ def home():
             return "<h3>❌ Please enter a valid endpoint name</h3>"
         if get_data(slug):
             return "<h3>❌ This chatbot link is already in use. Please choose a unique name.</h3>"
-        save_data(slug, {
-        "name": name,
-        "content": content,
-        "secret": secret_key
-        })
+		save_data(slug, {
+   	 "name": name,
+   	 "content": content,
+	    "secret": secret_key,
+	    "is_paid": False,
+	    "is_live": False
+		})
         send_email(email, slug, secret_key)
 
         return f"""
@@ -144,8 +146,34 @@ def chatbot(slug):
     if not data:
         return "Not found"
 
+    if not data.get("is_live"):
+        return "⚠️ This chatbot is not published yet"
+
     return render_template("chatbot.html", data=data or {}, slug=slug)
 
+@app.route("/launch/<slug>", methods=["GET", "POST"])
+def launch(slug):
+    data = get_data(slug)
+
+    if not data:
+        return "Not found"
+
+    if request.method == "POST":
+        data["is_paid"] = True
+        data["is_live"] = True
+        save_data(slug, data)
+
+        return redirect(f"/{slug}")
+
+    return f"""
+    <h2>Launch Chatbot</h2>
+    <p>{data['name']} will go live after payment</p>
+
+    <form method="POST">
+        <button>Pay ₹50 & Launch</button>
+    </form>
+    """
+    
 
 @app.route("/dashboard/<slug>", methods=["GET", "POST"])
 def dashboard(slug):
@@ -156,7 +184,6 @@ def dashboard(slug):
 
     user_key = request.args.get("key")
 
-    #  Check key
     if user_key != data.get("secret"):
         return "<h3>❌ Unauthorized</h3>"
 
@@ -164,10 +191,14 @@ def dashboard(slug):
         name = request.form.get("name")
         content = request.form.get("content")
 
+        existing = data
+
         save_data(slug, {
             "name": name,
             "content": content,
-            "secret": data.get("secret")
+            "secret": existing.get("secret"),
+            "is_paid": existing.get("is_paid", False),
+            "is_live": existing.get("is_live", False)
         })
 
         return redirect(f"/dashboard/{slug}?key={user_key}")

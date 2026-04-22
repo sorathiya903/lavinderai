@@ -162,11 +162,13 @@ def dashboard():
         return "User not found"
 
     return render_template(
-        "dashboard.html",
-        email=email,
-        chatbots=user.get("chatbots", {})
+    "dashboard.html",
+    email=email,
+    user=user,
+    
+    data=None,
+    slug=None
     )
-
 
 # ---------------- CHATBOT FETCH (FIXED) ----------------
 

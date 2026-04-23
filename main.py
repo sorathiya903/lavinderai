@@ -84,11 +84,11 @@ def google_callback():
     if not user_info:
         return "Failed to get user info"
 
-    email = user_info.get("email")
-    picture = user_info.get("picture")
-
-    session["email"] = email
-    session["picture"] = picture
+    session["user"] = {
+        "name": user_info.get("name", "No Name"),
+        "email": user_info.get("email", ""),
+        "picture": user_info.get("picture")
+    }
 
     email_key = safe_email_key(email)
     user = get_user(email_key)
@@ -200,7 +200,7 @@ def delete_chatbot(slug):
 
     save_user(email_key, user)
 
-    return redirect(f"/dashboard?email={email}")
+    return redirect("/dashboard")
 
 @app.route("/edit/<slug>", methods=["GET", "POST"])
 def edit_chatbot(slug):
@@ -235,7 +235,7 @@ def edit_chatbot(slug):
 
         print("✅ UPDATED BOT:", slug)
 
-        return redirect(f"/dashboard")
+        return redirect("/dashboard")
 
     return render_template(
         "edit.html",
@@ -275,7 +275,7 @@ def create():
                 "email": email,
                 "chatbots": {}
             }
-            # 🔥 FIX: ensure chatbots always exists
+            # FIX: ensure chatbots always exists
         if "chatbots" not in user:
             user["chatbots"] = {}
         print("USER BEFORE:", user)
@@ -322,7 +322,7 @@ def dashboard():
     if not user:
         return "User not found"
 
-    return render_template("dashboard.html",email=email,user=user,data=None,slug=None,picture=session.get("picture"))
+    return render_template("dashboard.html",email=email,user=user,data=None,slug=None,picture=user["picture"])
 
 # ---------------- CHATBOT FETCH (FIXED) ----------------
 

@@ -159,10 +159,9 @@ def landing():
 @app.route("/delete/<slug>", methods=["POST"])
 def delete_chatbot(slug):
 
-    email = request.args.get("email")
-
+    email = session.get("email")
     if not email:
-        return "❌ Email missing"
+        return redirect("/login")
 
     email_key = safe_email_key(email)
     user = get_user(email_key)
@@ -186,10 +185,9 @@ def delete_chatbot(slug):
 @app.route("/edit/<slug>", methods=["GET", "POST"])
 def edit_chatbot(slug):
 
-    email = request.args.get("email")
-
+    email = session.get("email")
     if not email:
-        return "❌ Email missing"
+        return redirect("/login")
 
     email_key = safe_email_key(email)
     user = get_user(email_key)
@@ -236,7 +234,6 @@ def create():
         
     if request.method == "POST":
 
-        email = request.form.get("email")
         name = request.form.get("name")
         slug = (request.form.get("slug") or "").lower().replace(" ", "-")
         content = request.form.get("content")
@@ -292,7 +289,6 @@ def dashboard():
     if not email:
         return redirect("/login")
 
-    email = request.args.get("email")
     print("DASHBOARD EMAIL:", email)
 
     email_key = safe_email_key(email)
@@ -310,7 +306,6 @@ def dashboard():
     "dashboard.html",
     email=email,
     user=user,
-    
     data=None,
     slug=None
     )
@@ -341,8 +336,11 @@ def chatbot(slug):
 
 # ---------------- LAUNCH ----------------
 
-@app.route("/launch/<email>/<slug>", methods=["GET", "POST"])
-def launch(email, slug):
+@app.route("/launch/<slug>", methods=["GET", "POST"])
+def launch(slug):
+    email = session.get("email")
+    if not email:
+        return redirect("/login")
 
     email_key = safe_email_key(email)
     user = get_user(email_key)

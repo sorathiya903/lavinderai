@@ -301,7 +301,7 @@ def create():
         send_email(email, slug, user["chatbots"][slug]["secret"])
         return render_template("success.html", slug=slug)
         
-    return render_template("index.html",name=session.get("name"),picture=session.get("picture"))
+    return render_template("index.html",name=session.get("name"),picture=user_session.get("picture"))
 
 
 # ---------------- DASHBOARD ----------------

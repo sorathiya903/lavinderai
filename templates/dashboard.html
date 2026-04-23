@@ -16,8 +16,8 @@ body {
 
 .topbar {
   background: white;
-  padding: 18px 30px;
-  display: flex;
+  padding: 15px 15px;
+  display: flex;align-items:center;
   justify-content: space-between;
   border-bottom: 1px solid #eee;
 }
@@ -84,7 +84,48 @@ a {
   font-weight: bold;
   text-decoration: none;
 }
+.profile {
+  cursor: pointer;
+}
 
+.profile img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #7c4dff;
+}
+
+.profile-menu {
+  position: absolute;
+  right: 20px;
+  top: 70px;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  width: 220px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  display: none;
+  z-index: 100;
+}
+
+.profile-menu a {
+  display: block;
+  margin-top: 10px;
+  color: #7c4dff;
+  text-decoration: none;
+}
+
+.profile-menu button {
+  width: 100%;
+  margin-top: 10px;
+  background: red;
+}
+
+.profile-menu hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 10px 0;
+}
 #qrBox {
   margin-top: 15px;
   background: white;
@@ -102,6 +143,23 @@ a {
 <div class="topbar">
   <div class="logo">Chatbot Dashboard</div>
 
+  <div class="profile" onclick="toggleMenu()">
+    <img src="{{ user.picture }}" alt="">
+  </div>
+
+  <div id="profileMenu" class="profile-menu">
+    <p><b>{{ user.name }}</b></p>
+    <p style="font-size:12px;color:gray;">{{ user.email }}</p>
+
+    <hr>
+
+    <a href="/logout">Logout</a>
+
+    <form method="POST" action="/delete-account" 
+          onsubmit="return confirm('Delete your account permanently?');">
+      <button class="danger">Delete Account</button>
+    </form>
+  </div>
 </div>
 
 <div class="container">
@@ -135,7 +193,7 @@ a {
   <br><br>
 
   <!-- ACTION BUTTONS -->
-  <button onclick="openEdit({{ s|tojson }}, {{ bot.name|tojson }}, {{ bot.content|tojson }})">
+  <button onclick="openEdit({{ s|tojson }}, {{ bot.name|tojson }}, {{ bot.content|tojson }})">Edit</button>
   <button onclick="openPreview('{{ s }}')">Preview</button>
 
   <button onclick="makeQR('{{ s }}')">QR</button>
@@ -262,5 +320,21 @@ function downloadQR(slug) {
 }
 
 </script>
+      <script>
+function toggleMenu() {
+    let menu = document.getElementById("profileMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+// close when clicking outside
+document.addEventListener("click", function(e) {
+    let profile = document.querySelector(".profile");
+    let menu = document.getElementById("profileMenu");
+
+    if (!profile.contains(e.target) && !menu.contains(e.target)) {
+        menu.style.display = "none";
+    }
+});
+</script>
 </body>
-    </html>
+  </html>

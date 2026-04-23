@@ -78,6 +78,7 @@ def google_callback():
         user = {
             "email": email,
             "name": user_info.get("name", ""),
+            "picture": user_info.get("picture", ""), 
             "chatbots": {}
         }
         save_user(email_key, user)

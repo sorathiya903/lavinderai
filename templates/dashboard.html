@@ -135,8 +135,7 @@ a {
   <br><br>
 
   <!-- ACTION BUTTONS -->
-  <button onclick="openEdit('{{ s }}','{{ bot.name }}',`{{ bot.content }}`)">Edit</button>
-
+  <button onclick="openEdit({{ s|tojson }}, {{ bot.name|tojson }}, {{ bot.content|tojson }})">
   <button onclick="openPreview('{{ s }}')">Preview</button>
 
   <button onclick="makeQR('{{ s }}')">QR</button>

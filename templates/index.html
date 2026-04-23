@@ -167,17 +167,22 @@ button:hover {
 <div class="header">
   <div class="title">Create a chatbot</div>
 
-  <div class="profile" onclick="toggleMenu()">
-     <img src="{{ picture }}">
-    <div class="dropdown" id="menu">
-      <div style="font-weight:bold;">{{ name }}</div>
+   <div class="profile" onclick="toggleMenu()">
+    <img src="{{ picture }}" alt="">
+  </div>
 
-      <a href="/logout">
-        <button>Logout</button>
-      </a>
+  <div id="profileMenu" class="profile-menu">
+    <p><b>{{ user.name }}</b></p>
+    <p style="font-size:12px;color:gray;">{{ user.email }}</p>
 
+    <hr>
+
+    <a href="/logout">Logout</a>
+
+    <form method="POST" action="/delete-account" 
+          onsubmit="return confirm('Delete your account permanently?');">
       <button class="danger">Delete Account</button>
-    </div>
+    </form>
   </div>
 </div>
 

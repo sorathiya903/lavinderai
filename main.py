@@ -333,11 +333,15 @@ def dashboard():
         return redirect("/login")
 
     email = user_session.get("email")
-        
-    email = user.get("email")
+
+    if not email:
+        return redirect("/login")
 
     email_key = safe_email_key(email)
     user = get_user(email_key)
+
+    if not user:
+        return "User not found"
 
     return render_template(
         "dashboard.html",
@@ -345,8 +349,6 @@ def dashboard():
         user=user,
         picture=user_session.get("picture")
     )
-
-
 # ---------------- CHATBOT FETCH (FIXED) ----------------
 
 @app.route("/<slug>")

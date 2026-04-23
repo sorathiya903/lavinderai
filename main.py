@@ -196,12 +196,17 @@ def create():
         if not email_key:
             return "❌ Invalid email"
 
-        user = get_user(email_key) or {
-            "name": name,
-            "email": email,
-            "chatbots": {}
-        }
+        user = get_user(email_key)
 
+        if not user:
+            user = {
+                "name": name,
+                "email": email,
+                "chatbots": {}
+            }
+            # 🔥 FIX: ensure chatbots always exists
+        if "chatbots" not in user:
+            user["chatbots"] = {}
         print("USER BEFORE:", user)
 
         if slug in user.get("chatbots", {}):

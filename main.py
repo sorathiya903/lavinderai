@@ -73,17 +73,20 @@ def delete_account():
     session.clear()
     return redirect("/")
 
+
 @app.route("/auth/google/callback")
 def google_callback():
     token = google.authorize_access_token()
-    user_info = token.get("userinfo")
+
+    resp = google.get("userinfo")   # 🔥 THIS IS IMPORTANT
+    user_info = resp.json()
 
     email = user_info["email"]
+    picture = user_info.get("picture")
 
-    # store in session 🔐
     session["email"] = email
+    session["picture"] = picture  # store it
 
-    # create user if not exists
     email_key = safe_email_key(email)
     user = get_user(email_key)
 
@@ -91,7 +94,7 @@ def google_callback():
         user = {
             "email": email,
             "name": user_info.get("name", ""),
-            "picture": user_info.get("picture", ""), 
+            "picture": picture,
             "chatbots": {}
         }
         save_user(email_key, user)

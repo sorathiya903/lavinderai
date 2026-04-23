@@ -403,6 +403,18 @@ def chat_api(slug):
 
     return jsonify({"reply": reply})
 
+@app.route("/check-slug/<slug>")
+def check_slug(slug):
+
+    all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
+
+    for user in all_users.values():
+        for s in (user.get("chatbots") or {}).keys():
+            if s == slug:
+                return jsonify({"available": False})
+
+    return jsonify({"available": True})
+    
 
 # ---------------- RUN ----------------
 

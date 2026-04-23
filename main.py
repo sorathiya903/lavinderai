@@ -77,18 +77,16 @@ def delete_account():
 @app.route("/auth/google/callback")
 def google_callback():
     token = google.authorize_access_token()
-
-    # SAFE way to get user info
     user_info = token.get("userinfo")
 
     if not user_info:
         return "Failed to get user info"
 
-    session["user"] = {
-        "name": user_info.get("name", "No Name"),
-        "email": user_info.get("email", ""),
-        "picture": user_info.get("picture")
-    }
+    email = user_info.get("email")
+    picture = user_info.get("picture")
+
+    session["email"] = email
+    session["picture"] = picture
 
     email_key = safe_email_key(email)
     user = get_user(email_key)
@@ -309,20 +307,21 @@ def dashboard():
     if not email:
         return redirect("/login")
 
-    print("DASHBOARD EMAIL:", email)
-
     email_key = safe_email_key(email)
-    if not email_key:
-        return "❌ Invalid email"
-
     user = get_user(email_key)
-
-    print("DASHBOARD USER:", user)
 
     if not user:
         return "User not found"
 
-    return render_template("dashboard.html",email=email,user=user,data=None,slug=None,picture=user["picture"])
+    picture = session.get("picture") or user.get("picture")
+
+    return render_template(
+        "dashboard.html",
+        email=email,
+        user=user,
+        picture=picture
+    )
+
 
 # ---------------- CHATBOT FETCH (FIXED) ----------------
 

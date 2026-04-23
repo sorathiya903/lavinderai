@@ -74,19 +74,23 @@ def delete_account():
     return redirect("/")
 
 
+
 @app.route("/auth/google/callback")
 def google_callback():
     token = google.authorize_access_token()
     user_info = token.get("userinfo")
 
     if not user_info:
-        return "Failed to get user info"
+        return "Auth failed"
 
     email = user_info.get("email")
     picture = user_info.get("picture")
 
-    session["email"] = email
-    session["picture"] = picture
+    session["user"] = {
+        "email": email,
+        "name": user_info.get("name"),
+        "picture": picture
+    }
 
     email_key = safe_email_key(email)
     user = get_user(email_key)
@@ -94,13 +98,14 @@ def google_callback():
     if not user:
         user = {
             "email": email,
-            "name": user_info.get("name", ""),
+            "name": user_info.get("name"),
             "picture": picture,
             "chatbots": {}
         }
         save_user(email_key, user)
 
     return redirect("/dashboard")
+
 
 def send_email(to_email, slug, secret_key):
     if not to_email:
@@ -303,23 +308,21 @@ def create():
 
 @app.route("/dashboard")
 def dashboard():
-    email = session.get("email")
-    if not email:
+    user_session = session.get("user")
+
+    if not user_session:
         return redirect("/login")
+
+    email = user_session["email"]
 
     email_key = safe_email_key(email)
     user = get_user(email_key)
-
-    if not user:
-        return "User not found"
-
-    picture = session.get("picture") or user.get("picture")
 
     return render_template(
         "dashboard.html",
         email=email,
         user=user,
-        picture=picture
+        picture=user_session.get("picture")
     )
 
 
@@ -428,7 +431,41 @@ def check_slug(slug):
 
     return jsonify({"available": True})
     
+#debugging 
+@app.route("/debug/profile")
+def debug_profile():
+    return {
+        "email": session.get("email"),
+        "picture": session.get("picture"),
+        "session_user": session.get("user")
+    }
 
+@app.route("/debug/profile-image")
+def debug_profile_image():
+    url = session.get("picture") or (session.get("user") or {}).get("picture")
+
+    if not url:
+        return {"error": "No picture found in session"}
+
+    try:
+        r = requests.get(url, timeout=5)
+
+        return {
+            "image_url": url,
+            "status_code": r.status_code,
+            "content_type": r.headers.get("Content-Type"),
+            "size_bytes": len(r.content)
+        }
+
+    except Exception as e:
+        return {
+            "error": str(e),
+            "image_url": url
+    }
+
+@app.route("/debug/session")
+def debug_session():
+    return dict(session)
 # ---------------- RUN ----------------
 
 if __name__ == "__main__":

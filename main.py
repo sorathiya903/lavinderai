@@ -60,29 +60,57 @@ def login():
         redirect_uri=url_for("google_callback", _external=True)
     )
 
+@app.route("/delete-account", methods=["POST"])
+def delete_account():
+    user = session.get("user")
+
+    if not user:
+        return redirect("/login")
+
+    email = user["email"]
+    if not email:
+        return redirect("/login")
+
+    email_key = safe_email_key(email)
+
+    requests.delete(f"{FIREBASE_URL}/users/{email_key}.json")
+
+    session.clear()
+    return redirect("/")
+
+
+
 @app.route("/auth/google/callback")
 def google_callback():
     token = google.authorize_access_token()
     user_info = token.get("userinfo")
 
-    email = user_info["email"]
+    if not user_info:
+        return "Auth failed"
 
-    # store in session 🔐
-    session["email"] = email
+    email = user_info.get("email")
+    picture = user_info.get("picture")
 
-    # create user if not exists
+    session["user"] = {
+        "email": email,
+        "name": user_info.get("name"),
+        "picture": picture
+    }
+
     email_key = safe_email_key(email)
     user = get_user(email_key)
 
     if not user:
         user = {
             "email": email,
-            "name": user_info.get("name", ""),
+            "name": user_info.get("name"),
+            "picture": picture,
             "chatbots": {}
         }
         save_user(email_key, user)
 
     return redirect("/dashboard")
+
 
 def send_email(to_email, slug, secret_key):
     if not to_email:
@@ -159,7 +187,11 @@ def landing():
 @app.route("/delete/<slug>", methods=["POST"])
 def delete_chatbot(slug):
 
-    email = session.get("email")
+    user = session.get("user")
+    if not user:
+        return redirect("/login")
+
+    email = user.get("email")
     if not email:
         return redirect("/login")
 
@@ -180,12 +212,16 @@ def delete_chatbot(slug):
 
     save_user(email_key, user)
 
-    return redirect(f"/dashboard?email={email}")
+    return redirect("/dashboard")
 
 @app.route("/edit/<slug>", methods=["GET", "POST"])
 def edit_chatbot(slug):
+    user = session.get("user")
+    if not user:
+        return redirect("/login")
 
-    email = session.get("email")
+    email = user.get("email")
+
     if not email:
         return redirect("/login")
 
@@ -215,7 +251,7 @@ def edit_chatbot(slug):
 
         print("✅ UPDATED BOT:", slug)
 
-        return redirect(f"/dashboard")
+        return redirect("/dashboard")
 
     return render_template(
         "edit.html",
@@ -227,7 +263,12 @@ def edit_chatbot(slug):
 
 @app.route("/create", methods=["GET", "POST"])
 def create():
-    email = session.get("email")
+    user = session.get("user")
+    if not user:
+        return redirect("/login")
+        
+    email = user["email"]
+     
 
     if not email:
         return redirect("/login")
@@ -255,7 +296,7 @@ def create():
                 "email": email,
                 "chatbots": {}
             }
-            # 🔥 FIX: ensure chatbots always exists
+            # FIX: ensure chatbots always exists
         if "chatbots" not in user:
             user["chatbots"] = {}
         print("USER BEFORE:", user)
@@ -278,37 +319,33 @@ def create():
         send_email(email, slug, user["chatbots"][slug]["secret"])
         return render_template("success.html", slug=slug)
         
-    return render_template("index.html")
+    user_session = session.get("user") or {}
 
+    return render_template("index.html",name=user_session.get("name"),picture=user_session.get("picture"))
 
 # ---------------- DASHBOARD ----------------
 
 @app.route("/dashboard")
 def dashboard():
-    email = session.get("email")
-    if not email:
+    user_session = session.get("user")
+
+    if not user_session:
         return redirect("/login")
 
-    print("DASHBOARD EMAIL:", email)
+    email = user_session.get("email")
+        
+    email = user.get("email")
 
     email_key = safe_email_key(email)
-    if not email_key:
-        return "❌ Invalid email"
-
     user = get_user(email_key)
 
-    print("DASHBOARD USER:", user)
-
-    if not user:
-        return "User not found"
-
     return render_template(
-    "dashboard.html",
-    email=email,
-    user=user,
-    data=None,
-    slug=None
+        "dashboard.html",
+        email=email,
+        user=user,
+        picture=user_session.get("picture")
     )
+
 
 # ---------------- CHATBOT FETCH (FIXED) ----------------
 
@@ -338,9 +375,11 @@ def chatbot(slug):
 
 @app.route("/launch/<slug>", methods=["GET", "POST"])
 def launch(slug):
-    email = session.get("email")
-    if not email:
+    user = session.get("user")
+    if not user:
         return redirect("/login")
+        
+    email = user.get("email")
 
     email_key = safe_email_key(email)
     user = get_user(email_key)
@@ -415,7 +454,11 @@ def check_slug(slug):
 
     return jsonify({"available": True})
     
+#debugging 
 
+@app.route("/debug/session")
+def debug_session():
+    return dict(session)
 # ---------------- RUN ----------------
 
 if __name__ == "__main__":

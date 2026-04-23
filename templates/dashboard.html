@@ -193,8 +193,15 @@ a {
   <br><br>
 
   <!-- ACTION BUTTONS -->
-  <button onclick="openEdit({{ s|tojson }}, {{ bot.name|tojson }}, {{ bot.content|tojson }})">Edit</button>
-  <button onclick="openPreview('{{ s }}')">Preview</button>
+  <button 
+  class="edit-btn"
+  data-slug="{{ s }}"
+  data-name="{{ bot.name }}"
+  data-content="{{ bot.content }}"
+>
+  Edit
+  </button>
+     <button onclick="openPreview('{{ s }}')">Preview</button>
 
   <button onclick="makeQR('{{ s }}')">QR</button>
   <button onclick="downloadQR('{{ s }}')">Download QR</button>
@@ -261,7 +268,15 @@ a {
   </div>
 </div>
 <script>
+document.querySelectorAll(".edit-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const slug = btn.dataset.slug;
+    const name = btn.dataset.name;
+    const content = btn.dataset.content;
 
+    openEdit(slug, name, content);
+  });
+});
 function openEdit(slug, name, content) {
     document.getElementById("editModal").style.display = "block";
 

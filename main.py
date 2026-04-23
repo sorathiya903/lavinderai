@@ -321,7 +321,7 @@ def create():
         
     user_session = session.get("user") or {}
 
-    return render_template("index.html",name=user_session.get("name"),picture=user_session.get("picture"))
+    return render_template("index.html",user=user,email=email,name=user_session.get("name"),picture=user_session.get("picture"))
 
 # ---------------- DASHBOARD ----------------
 

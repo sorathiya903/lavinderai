@@ -314,8 +314,9 @@ def create():
         send_email(email, slug, user["chatbots"][slug]["secret"])
         return render_template("success.html", slug=slug)
         
-    return render_template("index.html",name=session.get("name"),picture=user_session.get("picture"))
+    user_session = session.get("user")
 
+    return render_template( "index.html",name=user_session.get("name"),picture=user_session.get("picture"))
 
 # ---------------- DASHBOARD ----------------
 
@@ -326,14 +327,16 @@ def dashboard():
     if not user_session:
         return redirect("/login")
 
-    user = session.get("user")
-    if not user:
+    email = user_session.get("email")
+
+    if not email:
         return redirect("/login")
-        
-    email = user.get("email")
 
     email_key = safe_email_key(email)
     user = get_user(email_key)
+
+    if not user:
+        return "User not found"
 
     return render_template(
         "dashboard.html",

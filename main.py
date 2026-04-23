@@ -426,7 +426,7 @@ def preview(slug):
     if not bot:
         return "Bot not found"
 
-    return render_template("chatbot.html", data=bot, slug=slug, preview=True)
+    return render_template("preview.html", data=bot, slug=slug)
 
 # ---------------- API CHAT ----------------
 

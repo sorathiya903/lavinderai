@@ -168,8 +168,7 @@ button:hover {
   <div class="title">Create a chatbot</div>
 
   <div class="profile" onclick="toggleMenu()">
-    <img src="{{ picture }}">
-    
+     <img src="{{ session.get('picture') }}">
     <div class="dropdown" id="menu">
       <div style="font-weight:bold;">{{ name }}</div>
 

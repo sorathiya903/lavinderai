@@ -97,7 +97,7 @@ def send_email(to_email, slug, secret_key):
     }
 
     public_url = f"https://ai-faq-chatbot-for-businesses.onrender.com/{slug}"
-    dashboard_url = f"https://ai-faq-chatbot-for-businesses.onrender.com/dashboard?email={to_email}"
+    dashboard_url = "https://ai-faq-chatbot-for-businesses.onrender.com/dashboard"
 
     data = {
         "from": "onboarding@resend.dev",
@@ -215,7 +215,7 @@ def edit_chatbot(slug):
 
         print("✅ UPDATED BOT:", slug)
 
-        return redirect(f"/dashboard?email={email}")
+        return redirect(f"/dashboard")
 
     return render_template(
         "edit.html",
@@ -388,6 +388,9 @@ def chat_api(slug):
 
     if not data:
         return jsonify({"reply": "Chatbot not found"})
+
+    if not data.get("is_live"):
+        return jsonify({"reply": "Chatbot not active"})
 
     msg = request.json.get("message")
 

@@ -142,7 +142,7 @@ a {
   <button onclick="makeQR('{{ s }}')">QR</button>
   <button onclick="downloadQR('{{ s }}')">Download QR</button>
 
-  <a href="/launch/{{ email }}/{{ s }}">
+  <a href="/launch/{{ s }}">
     <button>Launch ₹50</button>
   </a>
 
@@ -151,7 +151,7 @@ a {
   </a>
 
   <!-- DELETE -->
-  <form method="POST" action="/delete/{{ s }}?email={{ email }}" 
+  <form method="POST" action="/delete/{{ s }}" 
         onsubmit="return confirm('Delete this chatbot?');">
     <button style="background:red;">Delete</button>
   </form>
@@ -212,7 +212,7 @@ function openEdit(slug, name, content) {
     document.getElementById("editContent").value = content;
 
     document.getElementById("editForm").action =
-        "/edit/" + slug + "?email={{ email }}";
+        "/edit/" + slug;
 }
 
 function closeEdit() {

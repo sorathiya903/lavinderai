@@ -1,10 +1,25 @@
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, session, url_for
 from HelperFunctions.firebase import get_user, save_user
 import secrets
 import os
 import requests
+from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
+
+oauth = OAuth(app)
+
+google = oauth.register(
+    name='google',
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
+
+
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 FIREBASE_URL = os.getenv("FIREBASE_URL")
@@ -34,6 +49,40 @@ def safe_email_key(email):
 
 
 # ---------------- EMAIL ----------------
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+
+@app.route("/login")
+def login():
+    return google.authorize_redirect(
+        redirect_uri=url_for("google_callback", _external=True)
+    )
+
+@app.route("/auth/google/callback")
+def google_callback():
+    token = google.authorize_access_token()
+    user_info = token.get("userinfo")
+
+    email = user_info["email"]
+
+    # store in session 🔐
+    session["email"] = email
+
+    # create user if not exists
+    email_key = safe_email_key(email)
+    user = get_user(email_key)
+
+    if not user:
+        user = {
+            "email": email,
+            "name": user_info.get("name", ""),
+            "chatbots": {}
+        }
+        save_user(email_key, user)
+
+    return redirect("/dashboard")
 
 def send_email(to_email, slug, secret_key):
     if not to_email:
@@ -180,6 +229,11 @@ def edit_chatbot(slug):
 
 @app.route("/create", methods=["GET", "POST"])
 def create():
+    email = session.get("email")
+
+    if not email:
+        return redirect("/login")
+        
     if request.method == "POST":
 
         email = request.form.get("email")
@@ -234,6 +288,9 @@ def create():
 
 @app.route("/dashboard")
 def dashboard():
+    email = session.get("email")
+    if not email:
+        return redirect("/login")
 
     email = request.args.get("email")
     print("DASHBOARD EMAIL:", email)

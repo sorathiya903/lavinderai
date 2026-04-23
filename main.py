@@ -411,6 +411,22 @@ def launch(slug):
     </form>
     """
 
+@app.route("/preview/<slug>")
+def preview(slug):
+    user = session.get("user")
+    if not user:
+        return redirect("/login")
+
+    email = user.get("email")
+    email_key = safe_email_key(email)
+    user_data = get_user(email_key)
+
+    bot = user_data.get("chatbots", {}).get(slug)
+
+    if not bot:
+        return "Bot not found"
+
+    return render_template("chatbot.html", data=bot, slug=slug, preview=True)
 
 # ---------------- API CHAT ----------------
 

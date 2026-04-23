@@ -182,7 +182,11 @@ def landing():
 @app.route("/delete/<slug>", methods=["POST"])
 def delete_chatbot(slug):
 
-    email = session.get("email")
+    user = session.get("user")
+    if not user:
+        return redirect("/login")
+
+    email = user.get("email")
     if not email:
         return redirect("/login")
 
@@ -207,8 +211,12 @@ def delete_chatbot(slug):
 
 @app.route("/edit/<slug>", methods=["GET", "POST"])
 def edit_chatbot(slug):
+    user = session.get("user")
+    if not user:
+        return redirect("/login")
 
-    email = session.get("email")
+    email = user.get("email")
+
     if not email:
         return redirect("/login")
 
@@ -250,7 +258,12 @@ def edit_chatbot(slug):
 
 @app.route("/create", methods=["GET", "POST"])
 def create():
-    email = session.get("email")
+    user = session.get("user")
+    if not user:
+        return redirect("/login")
+        
+    email = user["email"]
+     
 
     if not email:
         return redirect("/login")
@@ -313,7 +326,11 @@ def dashboard():
     if not user_session:
         return redirect("/login")
 
-    email = user_session["email"]
+    user = session.get("user")
+    if not user:
+        return redirect("/login")
+        
+    email = user.get("email")
 
     email_key = safe_email_key(email)
     user = get_user(email_key)
@@ -354,9 +371,11 @@ def chatbot(slug):
 
 @app.route("/launch/<slug>", methods=["GET", "POST"])
 def launch(slug):
-    email = session.get("email")
-    if not email:
+    user = session.get("user")
+    if not user:
         return redirect("/login")
+        
+    email = user.get("email")
 
     email_key = safe_email_key(email)
     user = get_user(email_key)

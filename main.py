@@ -78,14 +78,17 @@ def delete_account():
 def google_callback():
     token = google.authorize_access_token()
 
-    resp = google.get("userinfo")   # 🔥 THIS IS IMPORTANT
-    user_info = resp.json()
+    # SAFE way to get user info
+    user_info = token.get("userinfo")
 
-    email = user_info["email"]
+    if not user_info:
+        return "Failed to get user info"
+
+    email = user_info.get("email")
     picture = user_info.get("picture")
 
     session["email"] = email
-    session["picture"] = picture  # store it
+    session["picture"] = picture
 
     email_key = safe_email_key(email)
     user = get_user(email_key)

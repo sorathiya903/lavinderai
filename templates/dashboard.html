@@ -221,7 +221,7 @@ a {
   </form>
 
   <!-- QR BOX -->
-  <div id="qr-{{ s }}" style="margin-top:10px;"></div>
+  <div id="qr-{{ s }}" style="diaplay:none;margin-top:10px;"></div>
 
 </div>
 
@@ -258,9 +258,15 @@ a {
 
   <div style="background:white; width:95%; height:90%; margin:3% auto; border-radius:12px; overflow:hidden;">
     
-    <div style="padding:10px; display:flex; justify-content:space-between;">
+    <div style="padding:10px; display:flex; justify-content:space-between; align-items:center;">
+      
       <b>Preview</b>
-      <button onclick="closePreview()">Close</button>
+
+      <div style="display:flex; gap:10px;">
+        <button onclick="openInNewTab()">Open in New Tab</button>
+        <button onclick="closePreview()">Close</button>
+      </div>
+
     </div>
 
     <iframe id="previewFrame" style="width:100%; height:90%; border:none;"></iframe>
@@ -296,9 +302,16 @@ function openPreview(slug) {
     document.getElementById("previewModal").style.display = "block";
 
     document.getElementById("previewFrame").src =
-        "/" + slug;
+        "/preview/" + slug;
 }
-
+function openInNewTab() {
+    let frame = document.getElementById("previewFrame");
+    if (!frame.src) {
+        alert("No preview loaded");
+        return;
+    }
+    window.open(frame.src, "_blank");
+  }
 function closePreview() {
     document.getElementById("previewModal").style.display = "none";
 }
@@ -309,6 +322,16 @@ function makeQR(slug) {
     let url = base + slug;
 
     let box = document.getElementById("qr-" + slug);
+
+    // if QR already visible → hide it
+    if (box.style.display === "block") {
+        box.style.display = "none";
+        box.innerHTML = "";
+        return;
+    }
+
+    // show QR
+    box.style.display = "block";
     box.innerHTML = "";
 
     new QRCode(box, {
@@ -334,8 +357,6 @@ function downloadQR(slug) {
     a.click();
 }
 
-</script>
-      <script>
 function toggleMenu() {
     let menu = document.getElementById("profileMenu");
     menu.style.display = menu.style.display === "block" ? "none" : "block";

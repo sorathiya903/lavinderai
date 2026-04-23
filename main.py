@@ -322,13 +322,7 @@ def dashboard():
     if not user:
         return "User not found"
 
-    return render_template(
-    "dashboard.html",
-    email=email,
-    user=user,
-    data=None,
-    slug=None
-    )
+    return render_template("dashboard.html",email=email,user=user,data=None,slug=None,picture=session.get("picture"))
 
 # ---------------- CHATBOT FETCH (FIXED) ----------------
 

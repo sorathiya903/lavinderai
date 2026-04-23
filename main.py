@@ -60,6 +60,19 @@ def login():
         redirect_uri=url_for("google_callback", _external=True)
     )
 
+@app.route("/delete-account", methods=["POST"])
+def delete_account():
+    email = session.get("email")
+    if not email:
+        return redirect("/login")
+
+    email_key = safe_email_key(email)
+
+    requests.delete(f"{FIREBASE_URL}/users/{email_key}.json")
+
+    session.clear()
+    return redirect("/")
+
 @app.route("/auth/google/callback")
 def google_callback():
     token = google.authorize_access_token()

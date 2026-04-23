@@ -118,137 +118,150 @@ a {
         </a>
       </div>
     </h3>
+    {% if user.chatbots %}
+{% for s, bot in user.chatbots.items() %}
 
-    {% for s, bot in user.chatbots.items() %}
+<div style="background:white; padding:15px; margin:10px 0; border-radius:12px; border:1px solid #eee;">
+  
+  <b style="font-size:16px;">{{ bot.name }}</b><br>
+  <small style="color:gray;">/{{ s }}</small><br>
 
-    <div style="background:white; padding:10px; margin:10px 0; border-radius:10px; border:1px solid #eee;">
-      
-      <b>{{ bot.name }}</b><br>
-      <small>/{{ s }}</small><br>
+  {% if bot.is_live %}
+    <span class="badge live">LIVE</span>
+  {% else %}
+    <span class="badge notlive">NOT LIVE</span>
+  {% endif %}
 
-      {% if bot.is_live %}
-        <span class="badge live">LIVE</span>
-      {% else %}
-        <span class="badge notlive">NOT LIVE</span>
-      {% endif %}
+  <br><br>
 
-      <br><br>
+  <!-- ACTION BUTTONS -->
+  <button onclick="openEdit('{{ s }}','{{ bot.name }}',`{{ bot.content }}`)">Edit</button>
 
-      <a href="/edit/{{ s }}?email={{ email }}">
-  <button>Edit</button>
-</a>
+  <button onclick="openPreview('{{ s }}')">Preview</button>
 
-      <a href="/launch/{{ email }}/{{ s }}">
-        <button>Launch ₹50</button>
-      </a>
+  <button onclick="makeQR('{{ s }}')">QR</button>
+  <button onclick="downloadQR('{{ s }}')">Download QR</button>
 
-      <a href="/{{ s }}" target="_blank">
-        <button>Open</button>
-      </a>
-<form method="POST" action="/delete/{{ s }}?email={{ email }}" 
-      onsubmit="return confirm('Are you sure you want to delete this chatbot?');">
+  <a href="/launch/{{ email }}/{{ s }}">
+    <button>Launch ₹50</button>
+  </a>
 
-  <button style="background:red;color:white;">
-    Delete
-  </button>
+  <a href="/{{ s }}" target="_blank">
+    <button>Open</button>
+  </a>
 
-</form>
-    </div>
+  <!-- DELETE -->
+  <form method="POST" action="/delete/{{ s }}?email={{ email }}" 
+        onsubmit="return confirm('Delete this chatbot?');">
+    <button style="background:red;">Delete</button>
+  </form>
 
-    {% endfor %}
+  <!-- QR BOX -->
+  <div id="qr-{{ s }}" style="margin-top:10px;"></div>
 
-  </div>
 </div>
 
-{% if data %}
-<div class="container">
+{% endfor %}
+{% else %}
 
-  <div class="card">
+<!-- EMPTY STATE -->
+<div style="text-align:center; padding:30px; color:gray;">
+  <h3>No Chatbots Yet</h3>
+  <p>Create your first chatbot 🚀</p>
+</div>
 
+{% endif %}
+
+            <!-- EDIT MODAL -->
+<div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+
+  <div style="background:white; width:90%; max-width:500px; margin:10% auto; padding:20px; border-radius:12px;">
+    
     <h2>Edit Chatbot</h2>
 
-    <form method="POST">
-      <input name="name" value="{{ data.name }}" required>
-      <textarea name="content">{{ data.content }}</textarea>
+    <form method="POST" id="editForm">
+      <input name="name" id="editName" required>
+      <textarea name="content" id="editContent" required></textarea>
       <button type="submit">Update</button>
     </form>
 
-    <hr>
-
-    <div class="link-box">
-      <p>Public Link:</p>
-      <a href="/{{ slug }}" target="_blank">/{{ slug }}</a>
-    </div>
-
-    <h3>QR Code</h3>
-
-    <button type="button" onclick="makeQR()">Make QR</button>
-    <button type="button" onclick="downloadQR()">Download QR</button>
-
-    <div id="qrBox"></div>
-
-    <hr>
-
-    <h3>Launch Chatbot</h3>
-    <p>Make your chatbot live for users</p>
-
-    <form method="POST" action="/launch/{{ email }}/{{ slug }}">
-      <button type="submit">Pay ₹50 & Launch</button>
-    </form>
+    <br>
+    <button onclick="closeEdit()">Close</button>
 
   </div>
+</div><!-- PREVIEW MODAL -->
+<div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6);">
 
+  <div style="background:white; width:95%; height:90%; margin:3% auto; border-radius:12px; overflow:hidden;">
+    
+    <div style="padding:10px; display:flex; justify-content:space-between;">
+      <b>Preview</b>
+      <button onclick="closePreview()">Close</button>
+    </div>
+
+    <iframe id="previewFrame" style="width:100%; height:90%; border:none;"></iframe>
+
+  </div>
 </div>
-{% endif %}
-
-
 <script>
 
-function makeQR() {
-    let base = "https://ai-faq-chatbot-for-businesses.onrender.com/";
-    let url = base + "{{ slug }}";
+function openEdit(slug, name, content) {
+    document.getElementById("editModal").style.display = "block";
 
-    let box = document.getElementById("qrBox");
+    document.getElementById("editName").value = name;
+    document.getElementById("editContent").value = content;
+
+    document.getElementById("editForm").action =
+        "/edit/" + slug + "?email={{ email }}";
+}
+
+function closeEdit() {
+    document.getElementById("editModal").style.display = "none";
+}
+
+
+function openPreview(slug) {
+    document.getElementById("previewModal").style.display = "block";
+
+    document.getElementById("previewFrame").src =
+        "/" + slug;
+}
+
+function closePreview() {
+    document.getElementById("previewModal").style.display = "none";
+}
+
+
+function makeQR(slug) {
+    let base = "https://ai-faq-chatbot-for-businesses.onrender.com/";
+    let url = base + slug;
+
+    let box = document.getElementById("qr-" + slug);
     box.innerHTML = "";
 
     new QRCode(box, {
         text: url,
-        width: 180,
-        height: 180,
-        colorDark: "#000",
-        colorLight: "#fff",
-        correctLevel: QRCode.CorrectLevel.H
+        width: 150,
+        height: 150
     });
 }
 
-function downloadQR() {
-    let box = document.getElementById("qrBox");
+
+function downloadQR(slug) {
+    let box = document.getElementById("qr-" + slug);
 
     let canvas = box.querySelector("canvas");
-    let img = box.querySelector("img");
-
-    let dataURL;
-
-    if (canvas) {
-        dataURL = canvas.toDataURL("image/png");
-    } else if (img) {
-        let c = document.createElement("canvas");
-        c.width = img.width;
-        c.height = img.height;
-        c.getContext("2d").drawImage(img, 0, 0);
-        dataURL = c.toDataURL("image/png");
-    } else {
+    if (!canvas) {
         alert("Generate QR first!");
         return;
     }
 
     let a = document.createElement("a");
-    a.href = dataURL;
-    a.download = "chatbot-qr.png";
+    a.href = canvas.toDataURL("image/png");
+    a.download = slug + "-qr.png";
     a.click();
 }
 
 </script>
-
 </body>
     </html>

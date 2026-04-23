@@ -4,6 +4,10 @@ import secrets
 import os
 import requests
 from authlib.integrations.flask_client import OAuth
+import razorpay
+
+razorclient = razorpay.Client(auth=(os.getenv("RAZORPAY_KEY"), os.getenv("RAZORPAY_SECRET")))
+
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
@@ -471,7 +475,53 @@ def check_slug(slug):
                 return jsonify({"available": False})
 
     return jsonify({"available": True})
-    
+
+
+
+
+@app.route("/create-order/<slug>", methods=["POST"])
+def create_order(slug):
+    data = {
+        "amount": 100,  # ₹1 = 100 paise (change as needed)
+        "currency": "INR",
+        "payment_capture": 1
+    }
+
+    order = razorclient.order.create(data)
+
+    return jsonify({
+        "order_id": order["id"],
+        "amount": 100,
+        "key": os.getenv("RAZORPAY_KEY")
+    })
+
+@app.route("/verify-payment/<slug>", methods=["POST"])
+def verify_payment(slug):
+    data = request.json
+
+    try:
+        params = {
+            "razorpay_order_id": data["razorpay_order_id"],
+            "razorpay_payment_id": data["razorpay_payment_id"],
+            "razorpay_signature": data["razorpay_signature"]
+        }
+
+        razorclient.utility.verify_payment_signature(params)
+
+        # PAYMENT IS VALID → ACTIVATE BOT
+        all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
+
+        for email, user in all_users.items():
+            for s, bot in (user.get("chatbots") or {}).items():
+                if s == slug:
+                    bot["is_paid"] = True
+                    bot["is_live"] = True
+                    requests.put(f"{FIREBASE_URL}/users/{email}.json", json=user)
+
+        return jsonify({"status": "success"})
+
+    except Exception as e:
+        return jsonify({"status": "failed", "error": str(e)})
 #debugging 
 
 @app.route("/debug/session")

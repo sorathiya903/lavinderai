@@ -206,9 +206,40 @@ a {
   <button onclick="makeQR('{{ s }}')">QR</button>
   <button onclick="downloadQR('{{ s }}')">Download QR</button>
 
-  <a href="/launch/{{ s }}">
-    <button>Launch ₹50</button>
-  </a>
+  <button onclick="launchBot('{{ slug }}')">Pay & Launch</button>
+
+<script>
+async function launchBot(slug) {
+    let res = await fetch("/create-order/" + slug, {
+        method: "POST"
+    });
+
+    let data = await res.json();
+
+    var options = {
+        key: data.key,
+        amount: data.amount,
+        currency: "INR",
+        order_id: data.order_id,
+
+        handler: async function (response) {
+
+            // send payment proof to backend
+            await fetch("/verify-payment/" + slug, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(response)
+            });
+
+            alert("Bot launched successfully!");
+            window.location.href = "/" + slug;
+        }
+    };
+
+    var rzp = new Razorpay(options);
+    rzp.open();
+}
+</script>
 
   <a href="/{{ s }}" target="_blank">
     <button>Open</button>

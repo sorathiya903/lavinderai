@@ -657,6 +657,10 @@ def sitemap_xml():
 def howItWorks():
     return render_template("how-it-works.html")
 
+@app.route("/terms/")
+def terms_slash():
+    return redirect("/terms", code=301)
+
 
 if __name__ == "__main__":
     print("🚀 Server starting...")

@@ -666,6 +666,11 @@ def work_slash():
     return redirect("/how-it-works", code=301)
 
 
+@app.route("/create/")
+def create_slash():
+    return redirect("/create", code=301)
+
+
 if __name__ == "__main__":
     print("🚀 Server starting...")
     app.run()

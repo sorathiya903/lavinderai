@@ -661,6 +661,10 @@ def howItWorks():
 def terms_slash():
     return redirect("/terms", code=301)
 
+@app.route("/how-it-works/")
+def work_slash():
+    return redirect("/how-it-works", code=301)
+
 
 if __name__ == "__main__":
     print("🚀 Server starting...")

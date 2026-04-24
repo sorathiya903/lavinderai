@@ -379,9 +379,9 @@ def chatbot(slug):
 
             if s == slug:
                 print("FOUND BOT:", bot)
-
-                if not bot.get("is_live"):
-                    return "Not published yet"
+                
+                if not bot.get("expires_at") or int(time.time()) > bot["expires_at"]:
+                    return "Chatbot expired or not activated"
 
                 return render_template("chatbot.html", data=bot, slug=slug)
 

@@ -653,7 +653,7 @@ def robots_txt():
 def sitemap_xml():
     return send_from_directory('static', 'sitemap.xml')
 
-@app.route('/how-it-works.html")
+@app.route('/how-it-works")
 def howItWorks():
     return render_template("how-it-works.html")
 

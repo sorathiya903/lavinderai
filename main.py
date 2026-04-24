@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, jsonify, session, url_for
+from flask import Flask, render_template, request, redirect, jsonify, session, url_for, send_from_directory
 from HelperFunctions.firebase import get_user, save_user
 import secrets
 import os
@@ -644,6 +644,14 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(check_expired_bots, 'interval', minutes=1)
 scheduler.start()
 
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_from_directory('static', 'robots.txt')
+
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    return send_from_directory('static', 'sitemap.xml')
 if __name__ == "__main__":
     print("🚀 Server starting...")
     app.run()

@@ -24,17 +24,10 @@
       color: #222;
     }
 
-    header {
-      padding: 20px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: white;
-      border-bottom: 1px solid #ddd;
-    }
+    
 
     .logo {
-      font-size: 22px;
+      font-size:10px;
       font-weight: bold;
       color: #7c4dff;
     }
@@ -54,7 +47,7 @@
     }
 
     .hero h1 {
-      font-size: 40px;
+      font-size: 35px;
       color: #7c4dff;
     }
 
@@ -124,10 +117,168 @@
 </head>
 <body>
 
-<header>
-  <div class="logo">LavinderAI</div>
-  <button class="btn" onclick="location.href='/create'">Get Started</button>
+<header class="navbar">
+  <div class="nav-container">
+
+    <!-- LOGO -->
+    <div class="logo" onclick="location.href='/'">
+      LavinderAI
+    </div>
+
+    <!-- DESKTOP MENU -->
+    <nav class="nav-links" id="navLinks">
+      <a href="/" class="active">Home</a>
+      <a href="/how-it-works">How It Works</a>
+      <a href="/terms">Terms</a>
+      <a href="/create">Create</a>
+      <a href="/dashboard">Dashboard</a>
+    </nav>
+
+    <!-- CTA BUTTON -->
+    <a href="/create" class="cta-btn">Get Started</a>
+
+    <!-- HAMBURGER -->
+    <div class="menu-toggle" onclick="toggleMenu()">
+      ☰
+    </div>
+
+  </div>
 </header>
+
+<style>
+/* NAVBAR */
+  .nav-links a.active {
+  color: #7c4dff;
+}
+
+.nav-links a.active::after {
+  width: 100%;
+}
+.navbar {
+  background: white;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* CONTAINER */
+.nav-container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* LOGO */
+.logo {
+  font-size: 25px;
+  font-weight: bold;
+  color: #7c4dff;
+  cursor: pointer;
+}
+
+/* NAV LINKS */
+.nav-links {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+
+.nav-links a {
+  color: #555;
+  text-decoration: none;
+  font-size: 15px;
+  position: relative;
+  padding: 5px 0;
+  transition: 0.3s;
+}
+
+/* HOVER UNDERLINE EFFECT */
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 0%;
+  height: 2px;
+  background: #7c4dff;
+  transition: 0.3s;
+}
+
+.nav-links a:hover {
+  color: #7c4dff;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+/* CTA BUTTON */
+.cta-btn {
+  background: #7c4dff;
+  color: white;
+  padding: 9px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.cta-btn:hover {
+  background: #6a3df0;
+  transform: translateY(-1px);
+}
+
+/* HAMBURGER */
+.menu-toggle {
+  display: none;
+  font-size: 22px;
+  color: #7c4dff;
+  cursor: pointer;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+  .nav-links {
+    position: absolute;
+    top: 65px;
+    right: 15px;
+    background: white;
+    flex-direction: column;
+    padding: 15px;
+    border-radius: 10px;
+    display: none;
+    width: 220px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  }
+
+  .nav-links a {
+    padding: 10px;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .cta-btn {
+    display: none;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+}
+</style>
+
+<script>
+function toggleMenu() {
+  document.getElementById("navLinks").classList.toggle("active");
+}
+</script>
 
 <section class="hero">
   <h1>AI FAQ Chatbot for Businesses - Create Chatbots in Seconds</h1>

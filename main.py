@@ -76,6 +76,10 @@ def check_expired_bots():
                     send_renewal_email(email, slug)
                     bot["expiry_email_sent"] = True
 
+                bot["is_live"] = False
+                bot["is_paid"] = False
+
+
                 requests.put(
                     f"{FIREBASE_URL}/users/{email}.json",
                     json=user
@@ -618,10 +622,10 @@ def send_renewal_email(email, slug):
 
     requests.post(url, headers=headers, json=data)
 # ---------------- RUN ----------------
-if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(check_expired_bots, 'interval', hours=24)
-    scheduler.start()
+scheduler = BackgroundScheduler()
+scheduler.add_job(check_expired_bots, 'interval', minutes=1)
+scheduler.start()
+
 if __name__ == "__main__":
     print("🚀 Server starting...")
     app.run()

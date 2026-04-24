@@ -6,6 +6,7 @@ import requests
 from authlib.integrations.flask_client import OAuth
 import razorpay
 import time
+from apscheduler.schedulers.background import BackgroundScheduler
 
 razorclient = razorpay.Client(auth=(os.getenv("RAZORPAY_KEY"), os.getenv("RAZORPAY_SECRET")))
 
@@ -56,6 +57,26 @@ def safe_email_key(email):
 def is_bot_active(bot):
     now = int(time.time())
     return bot.get("expires_at") and now < bot["expires_at"]
+
+def check_expired_bots():
+    all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
+    now = int(time.time())
+
+    for email, user in all_users.items():
+        chatbots = user.get("chatbots", {})
+
+        for slug, bot in chatbots.items():
+
+            if bot.get("expires_at") and now > bot["expires_at"]:
+
+                if not bot.get("expiry_email_sent"):
+                    send_renewal_email(email, slug)
+                    bot["expiry_email_sent"] = True
+
+                requests.put(
+                    f"{FIREBASE_URL}/users/{email}.json",
+                    json=user
+                )
 
 # ---------------- EMAIL ----------------
 @app.route("/logout")
@@ -595,7 +616,10 @@ def send_renewal_email(email, slug):
 
     requests.post(url, headers=headers, json=data)
 # ---------------- RUN ----------------
-
+if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(check_expired_bots, 'interval', hours=24)
+    scheduler.start()
 if __name__ == "__main__":
     print("🚀 Server starting...")
     app.run()

@@ -463,20 +463,43 @@ async function launchBot(slug) {
     return d.toLocaleString();
 }
 
-function openDetails(slug) {
-    let bot = window.chatbots[slug];
-
-    let status = bot.is_live ? "LIVE" : "NOT LIVE";
-
-    document.getElementById("detailsContent").innerHTML = `
-        <p><b>Name:</b> ${bot.name}</p>
-        <p><b>Status:</b> ${status}</p>
-        <p><b>Created:</b> ${formatDate(bot.created_at)}</p>
-        <p><b>Expires:</b> ${bot.expires_at ? formatDate(bot.expires_at) : "Not active"}</p>
-    `;
+async function openDetails(slug) {
 
     document.getElementById("bottomSheet").classList.add("active");
-}
+    document.getElementById("detailsContent").innerHTML = "Loading...";
+
+    try {
+        let res = await fetch("/api/dashboard-data");
+        let data = await res.json();
+
+        let bot = data.chatbots[slug];
+
+        if (!bot) {
+            document.getElementById("detailsContent").innerHTML = "Bot not found";
+            return;
+        }
+
+        let created = bot.created_at 
+            ? new Date(bot.created_at * 1000).toLocaleString()
+            : "N/A";
+
+        let expires = bot.expires_at 
+            ? new Date(bot.expires_at * 1000).toLocaleString()
+            : "Not active";
+
+        let status = bot.is_live ? "LIVE" : "NOT LIVE";
+
+        document.getElementById("detailsContent").innerHTML = `
+            <p><b>Name:</b> ${bot.name}</p>
+            <p><b>Status:</b> ${status}</p>
+            <p><b>Created:</b> ${created}</p>
+            <p><b>Expires:</b> ${expires}</p>
+        `;
+
+    } catch (err) {
+        document.getElementById("detailsContent").innerHTML = "Error loading data";
+    }
+  }
 
 function closeDetails() {
     document.getElementById("bottomSheet").classList.remove("active");

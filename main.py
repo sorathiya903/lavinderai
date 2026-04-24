@@ -7,6 +7,9 @@ from authlib.integrations.flask_client import OAuth
 import razorpay
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
+atexit.register(lambda: scheduler.shutdown())
+
 
 razorclient = razorpay.Client(auth=(os.getenv("RAZORPAY_KEY"), os.getenv("RAZORPAY_SECRET")))
 
@@ -438,7 +441,7 @@ def launch(slug):
 
         bot["is_paid"] = True
         bot["is_live"] = True
-        bot["created_at"] = int(time.time())
+        
         bot["expires_at"] = int(time.time()) + (30 * 24 * 60 * 60)
         
 
@@ -574,10 +577,9 @@ def verify_payment(slug):
                 
 
                 # update firebase
+                email_key = email.replace(".", "_")
                 requests.put(
-                    f"{FIREBASE_URL}/users/{email}.json",
-                    json=user
-                )
+                    f"{FIREBASE_URL}/users/{email_key}.json",json=user)
 
         return jsonify({"status": "success"})
 

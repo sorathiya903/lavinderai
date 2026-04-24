@@ -376,21 +376,8 @@ def dashboard():
     if not user_session:
         return redirect("/login")
 
-    email = user_session.get("email")
-
-    if not email:
-        return redirect("/login")
-
-    email_key = safe_email_key(email)
-    user = get_user(email_key)
-
-    if not user:
-        return "User not found"
-
     return render_template(
         "dashboard.html",
-        email=email,
-        user=user,
         picture=user_session.get("picture")
     )
 # ---------------- CHATBOT FETCH (FIXED) ----------------
@@ -621,6 +608,24 @@ def send_renewal_email(email, slug):
     }
 
     requests.post(url, headers=headers, json=data)
+
+
+@app.route("/api/dashboard-data")
+def dashboard_data():
+    user_session = session.get("user")
+
+    if not user_session:
+        return jsonify({"error": "not logged in"})
+
+    email = user_session.get("email")
+    email_key = safe_email_key(email)
+    user = get_user(email_key)
+
+    return jsonify({
+        "name": user.get("name"),
+        "email": user.get("email"),
+        "chatbots": user.get("chatbots", {})
+    })
 # ---------------- RUN ----------------
 scheduler = BackgroundScheduler()
 scheduler.add_job(check_expired_bots, 'interval', minutes=1)

@@ -265,6 +265,11 @@ def edit_chatbot(slug):
     )
 
 
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+
 @app.route("/create", methods=["GET", "POST"])
 def create():
     user = session.get("user")

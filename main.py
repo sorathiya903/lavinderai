@@ -644,7 +644,7 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(check_expired_bots, 'interval', minutes=1)
 scheduler.start()
 
-
+#seo relates 
 @app.route('/robots.txt')
 def robots_txt():
     return send_from_directory('static', 'robots.txt')
@@ -652,6 +652,12 @@ def robots_txt():
 @app.route('/sitemap.xml')
 def sitemap_xml():
     return send_from_directory('static', 'sitemap.xml')
+
+@app.route('/how-it-works")
+def howItWorks():
+    return render_template("how-it-works.html")
+
+
 if __name__ == "__main__":
     print("🚀 Server starting...")
     app.run()

@@ -53,6 +53,10 @@ def safe_email_key(email):
     return email.replace(".", "_")
 
 
+def is_bot_active(bot):
+    now = int(time.time())
+    return bot.get("expires_at") and now < bot["expires_at"]
+
 # ---------------- EMAIL ----------------
 @app.route("/logout")
 def logout():

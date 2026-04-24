@@ -210,7 +210,7 @@ button:hover {
 
     <a href="/logout">Logout</a>
 
-    <form method="POST" action="/delete-account" 
+    <form method="POST" onsubmit="markSaved()" action="/delete-account" 
           onsubmit="return confirm('Delete your account permanently?');">
       <button class="danger">Delete Account</button>
     </form>
@@ -243,7 +243,15 @@ function toggleMenu() {
     let menu = document.getElementById("profileMenu");
     menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
+document.addEventListener("click", function(e) {
+    let profile = document.querySelector(".profile");
+    let menu = document.getElementById("profileMenu");
 
+    if (!profile.contains(e.target) && !menu.contains(e.target)) {
+        menu.style.display = "none";
+    }
+});
+  
 let timer = null;
 let btn = document.getElementById("btn");
 let slugInput = document.getElementById("slug");
@@ -281,8 +289,45 @@ slugInput.addEventListener("input", function() {
 
     }, 500);
 });
+let isDirty = true; // assume user is editing
 
+// detect form changes (optional but recommended)
+document.addEventListener("input", () => {
+    isDirty = true;
+});
+
+// BACK BUTTON / HISTORY CONTROL
+window.onload = function () {
+    history.pushState(null, "", window.location.href);
+};
+
+window.onpopstate = function () {
+    if (isDirty) {
+        let leave = confirm("You have unsaved changes. Do you want to leave this page?");
+        
+        if (leave) {
+            window.location.href = "/dashboard";
+        } else {
+            history.pushState(null, "", window.location.href);
+        }
+    } else {
+        window.location.href = "/dashboard";
+    }
+};
+
+  
+function markSaved() {
+    isDirty = false;
+}
+window.addEventListener("beforeunload", function (e) {
+    if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+    }
+});
 </script>
+
+
 
 </body>
 </html>

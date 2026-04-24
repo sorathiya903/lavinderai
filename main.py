@@ -5,6 +5,7 @@ import os
 import requests
 from authlib.integrations.flask_client import OAuth
 import razorpay
+import time
 
 razorclient = razorpay.Client(auth=(os.getenv("RAZORPAY_KEY"), os.getenv("RAZORPAY_SECRET")))
 
@@ -314,11 +315,13 @@ def create():
             return "❌ Slug already exists"
 
         user["chatbots"][slug] = {
-            "name": name,
+            "name": name"
             "content": content,
             "secret": secrets.token_hex(8),
             "is_paid": False,
-            "is_live": False
+            "is_live": False,
+            "created_at": int(time.time()),
+            "expires_at": None
         }
 
         save_user(email_key, user)
@@ -442,29 +445,34 @@ def preview(slug):
 @app.route("/api/chat/<slug>", methods=["POST"])
 def chat_api(slug):
 
-    data = None
-
     all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
+    now = int(time.time())
+
+    bot = None
 
     for user in all_users.values():
-        for s, bot in (user.get("chatbots") or {}).items():
+        for s, b in (user.get("chatbots") or {}).items():
             if s == slug:
-                data = bot
+                bot = b
                 break
 
-    if not data:
+    if not bot:
         return jsonify({"reply": "Chatbot not found"})
 
-    if not data.get("is_live"):
-        return jsonify({"reply": "Chatbot not active"})
+    #  NOT ACTIVE IF NOT PAID
+    if not bot.get("is_paid"):
+        return jsonify({"reply": "This chatbot is not activated yet."})
+
+    #  EXPIRED CHECK (MOST IMPORTANT)
+    if bot.get("expires_at") and now > bot["expires_at"]:
+        return jsonify({"reply": "This chatbot has expired. Please renew."})
 
     msg = request.json.get("message")
 
     if not msg:
         return jsonify({"reply": "Empty message"})
 
-    info = data.get("content", "")
-    system_prompt = instructions + info
+    system_prompt = instructions + bot.get("content", "")
     reply = ask_groq(system_prompt, msg)
 
     return jsonify({"reply": reply})
@@ -500,6 +508,8 @@ def create_order(slug):
         "key": os.getenv("RAZORPAY_KEY")
     })
 
+
+
 @app.route("/verify-payment/<slug>", methods=["POST"])
 def verify_payment(slug):
     data = request.json
@@ -511,27 +521,69 @@ def verify_payment(slug):
             "razorpay_signature": data["razorpay_signature"]
         }
 
+        # verify signature
         razorclient.utility.verify_payment_signature(params)
 
-        # PAYMENT IS VALID → ACTIVATE BOT
+        # get all users
         all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
 
+        now = int(time.time())
+
         for email, user in all_users.items():
-            for s, bot in (user.get("chatbots") or {}).items():
-                if s == slug:
-                    bot["is_paid"] = True
-                    bot["is_live"] = True
-                    requests.put(f"{FIREBASE_URL}/users/{email}.json", json=user)
+            chatbots = user.get("chatbots") or {}
+
+            if slug in chatbots:
+                bot = chatbots[slug]
+
+                bot["is_paid"] = True
+                bot["created_at"] = now
+                bot["expires_at"] = now + (30 * 24 * 60 * 60)
+
+                # DO NOT permanently trust is_live
+                bot["is_live"] = True
+
+                # update firebase
+                requests.put(
+                    f"{FIREBASE_URL}/users/{email}.json",
+                    json=user
+                )
 
         return jsonify({"status": "success"})
 
     except Exception as e:
         return jsonify({"status": "failed", "error": str(e)})
+
 #debugging 
 
 @app.route("/debug/session")
 def debug_session():
     return dict(session)
+
+#chatbot expiry
+def send_renewal_email(email, slug):
+
+    url = "https://api.resend.com/emails"
+
+    headers = {
+        "Authorization": f"Bearer {RESEND_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "from": "onboarding@resend.dev",
+        "to": [email],
+        "subject": "Your chatbot has expired ⚠️",
+        "html": f"""
+        <h2>Renew Your Chatbot</h2>
+        <p>Your chatbot <b>{slug}</b> has expired.</p>
+        <p>Pay ₹50 to reactivate it again.</p>
+        <a href='https://ai-faq-chatbot-for-businesses.onrender.com/dashboard'>
+        Go to Dashboard
+        </a>
+        """
+    }
+
+    requests.post(url, headers=headers, json=data)
 # ---------------- RUN ----------------
 
 if __name__ == "__main__":

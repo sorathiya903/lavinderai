@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>How LavinderAI Works</title>
+
+<!-- Highlight.js -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  hljs.highlightAll();
+});
+</script>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #1a0f2e, #2a1450);
+  color: #eee;
+}
+
+/* HEADER */
+header {
+  padding: 20px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #c9b6ff;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* CONTAINER */
+.container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+/* HEADINGS */
+h1 {
+  text-align: center;
+  color: #b388ff;
+}
+
+h2 {
+  margin-top: 40px;
+  color: #c9b6ff;
+}
+
+/* CARD */
+.card {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 14px;
+  margin-top: 15px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* CODE BLOCK */
+pre {
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 15px;
+  background: #0d1117 !important;
+  border: 1px solid #2d2d3a;
+  overflow-x: auto;
+}
+
+code {
+  font-size: 14px;
+}
+
+/* STEP NUMBER */
+.step {
+  display: inline-block;
+  background: #7c4dff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+/* FLOW BOX */
+.flow {
+  text-align: center;
+  margin-top: 20px;
+  font-weight: bold;
+  color: #aaa;
+}
+
+/* BUTTON */
+.btn {
+  display: inline-block;
+  margin-top: 20px;
+  background: #7c4dff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<header>LavinderAI System</header>
+
+<div class="container">
+
+<h1>How LavinderAI Works</h1>
+
+<p style="text-align:center;color:#bbb;">
+Built using Flask, APIs, and AI to create smart business chatbots instantly.
+</p>
+
+<!-- STEP 1 -->
+<h2><span class="step">1</span> Authentication</h2>
+<div class="card">
+Users login securely using Google OAuth.
+</div>
+
+<pre><code class="language-python">
+/login → Google OAuth → /auth/google/callback → session created
+</code></pre>
+
+<!-- STEP 2 -->
+<h2><span class="step">2</span> Create Chatbot</h2>
+<div class="card">
+User enters business name, slug, and FAQ content.  
+Flask saves it in Firebase.
+</div>
+
+<pre><code class="language-python">
+@app.route("/create", methods=["POST"])
+def create():
+    user["chatbots"][slug] = {
+        "name": name,
+        "content": content,
+        "is_live": False
+    }
+</code></pre>
+
+<!-- STEP 3 -->
+<h2><span class="step">3</span> AI Processing</h2>
+<div class="card">
+Messages are sent to AI (Groq API) to generate responses.
+</div>
+
+<pre><code class="language-python">
+def ask_groq(prompt, msg):
+    return requests.post(API_URL, json={
+        "messages": [...]
+    })
+</code></pre>
+
+<!-- STEP 4 -->
+<h2><span class="step">4</span> Payment & Activation</h2>
+<div class="card">
+Razorpay handles payments. After payment, chatbot becomes LIVE.
+</div>
+
+<pre><code class="language-javascript">
+var rzp = new Razorpay(options);
+rzp.open();
+</code></pre>
+
+<!-- STEP 5 -->
+<h2><span class="step">5</span> Public Chatbot</h2>
+<div class="card">
+Each chatbot gets a unique public URL for customers.
+</div>
+
+<pre><code class="language-bash">
+https://lavinderai.onrender.com/your-bot
+</code></pre>
+
+<!-- STEP 6 -->
+<h2><span class="step">6</span> Real Example</h2>
+<div class="card">
+A shop owner creates a chatbot for answering customer questions automatically.
+</div>
+
+<pre><code class="language-bash">
+Business: ABC Electronics
+Slug: abc-electronics
+
+Customer asks:
+"What are your timings?"
+
+AI replies instantly.
+</code></pre>
+
+<!-- FLOW -->
+<div class="flow">
+User → Create → Store → AI → Launch → Customers interact
+</div>
+
+<div style="text-align:center;">
+<a href="/create" class="btn">Create Your Chatbot</a>
+</div>
+
+</div>
+
+</body>
+  </html>

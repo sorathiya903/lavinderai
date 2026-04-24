@@ -319,7 +319,7 @@ def create():
             return "❌ Slug already exists"
 
         user["chatbots"][slug] = {
-            "name": name"
+            "name": name,
             "content": content,
             "secret": secrets.token_hex(8),
             "is_paid": False,
@@ -379,10 +379,12 @@ def chatbot(slug):
 
             if s == slug:
                 print("FOUND BOT:", bot)
-                
-                if not bot.get("expires_at") or int(time.time()) > bot["expires_at"]:
-                    return "Chatbot expired or not activated"
 
+                now = int(time.time())
+
+                if not bot.get("is_live") or (bot.get("expires_at") and now > bot["expires_at"]):
+                    return "Not available or expired"
+  
                 return render_template("chatbot.html", data=bot, slug=slug)
 
     print("BOT NOT FOUND")
@@ -415,6 +417,9 @@ def launch(slug):
 
         bot["is_paid"] = True
         bot["is_live"] = True
+        bot["created_at"] = int(time.time())
+        bot["expires_at"] = int(time.time()) + (30 * 24 * 60 * 60)
+        
 
         save_user(email_key, user)
 
@@ -540,11 +545,12 @@ def verify_payment(slug):
                 bot = chatbots[slug]
 
                 bot["is_paid"] = True
+                bot["is_live"] = True
                 bot["created_at"] = now
                 bot["expires_at"] = now + (30 * 24 * 60 * 60)
 
                 # DO NOT permanently trust is_live
-                bot["is_live"] = True
+                
 
                 # update firebase
                 requests.put(

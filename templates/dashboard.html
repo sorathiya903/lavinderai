@@ -146,6 +146,36 @@ a {
   padding: 10px;
   border-radius: 10px;
 }
+  
+  #bottomSheet {
+  position: fixed;
+  left: 0;
+  bottom: -100%;
+  width: 100%;
+  height: 50%;
+  background: white;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+  transition: 0.3s ease;
+  z-index: 9999;
+}
+
+#bottomSheet.active {
+  bottom: 0;
+}
+
+.sheet-content {
+  padding: 20px;
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
 </style>
 </head>
 
@@ -232,6 +262,7 @@ a {
         onsubmit="return confirm('Delete this chatbot?');">
     <button style="background:red;">Delete</button>
   </form>
+  <button onclick="openDetails('{{ s }}')">Details</button>
 
   <!-- QR BOX -->
   <div id="qr-{{ s }}" style="display:none;margin-top:10px;"></div>
@@ -283,6 +314,18 @@ a {
     </div>
 
     <iframe id="previewFrame" style="width:100%; height:90%; border:none;"></iframe>
+
+  </div>
+</div>
+    <div id="bottomSheet">
+  <div class="sheet-content">
+    
+    <div class="sheet-header">
+      <span>Chatbot Details</span>
+      <button onclick="closeDetails()">✕</button>
+    </div>
+
+    <div id="detailsContent"></div>
 
   </div>
 </div>
@@ -415,6 +458,30 @@ async function launchBot(slug) {
     var rzp = new Razorpay(options);
     rzp.open();
 }
+    function formatDate(ts) {
+    let d = new Date(ts * 1000);
+    return d.toLocaleString();
+}
+
+function openDetails(slug) {
+    let bot = window.chatbots[slug];
+
+    let status = bot.is_live ? "LIVE" : "NOT LIVE";
+
+    document.getElementById("detailsContent").innerHTML = `
+        <p><b>Name:</b> ${bot.name}</p>
+        <p><b>Status:</b> ${status}</p>
+        <p><b>Created:</b> ${formatDate(bot.created_at)}</p>
+        <p><b>Expires:</b> ${bot.expires_at ? formatDate(bot.expires_at) : "Not active"}</p>
+    `;
+
+    document.getElementById("bottomSheet").classList.add("active");
+}
+
+function closeDetails() {
+    document.getElementById("bottomSheet").classList.remove("active");
+}
+    
 </script>
 </body>
   </html>

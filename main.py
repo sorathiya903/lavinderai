@@ -577,7 +577,7 @@ def verify_payment(slug):
                 email_key = email.replace(".", "_")
                 requests.put(
                     f"{FIREBASE_URL}/users/{email_key}.json",json=user)
-                send_renewal_email(email, slug)
+                send_activation_email(email, slug)
 
         return jsonify({"status": "success"})
 
@@ -612,6 +612,24 @@ def send_renewal_email(email, slug):
         Go to Dashboard
         </a>
         """
+    }
+
+    requests.post(url, headers=headers, json=data)
+
+def send_activation_email(email, slug):
+
+    url = "https://api.resend.com/emails"
+
+    headers = {
+        "Authorization": f"Bearer {RESEND_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "from": "onboarding@resend.dev",
+        "to": [email],
+        "subject": "Your chatbot has activated",
+        "html": f"""<table width="100%" cellpadding="0" cellspacing="0" style="padding:20px;">     <tr>       <td align="center">          <!-- Card -->         <table width="500" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:12px; padding:30px; box-shadow:0 4px 10px rgba(0,0,0,0.05);">                      <!-- Title -->           <tr>             <td align="center">               <h2 style="margin:0; color:#7c4dff;">🚀 Your Chatbot is Live!</h2>               <p style="color:#555; font-size:14px;">LavinderAI Activation Successful</p>             </td>           </tr>            <!-- Divider -->           <tr>             <td style="padding:20px 0;">               <hr style="border:none; border-top:1px solid #eee;">             </td>           </tr>            <!-- Public URL -->           <tr>             <td>               <p style="margin:0; font-size:14px;"><b>Public Chat Link:</b></p>               <a href="https://lavinderai.onrender.com/{slug}"                   style="...display:inline-block; margin-top:8px; color:#7c4dff; text-decoration:none; font-size:14px;">                  Go to Dashboard →               </a>             </td>           </tr>            <!-- Info -->           <tr>             <td style="padding-top:25px;">               <p style="font-size:13px; color:#666;">                 You can now start using your AI-powered FAQ chatbot.                   Customize responses anytime from your dashboard.               </p>             </td>           </tr>            <!-- Warning -->           <tr>             <td style="padding-top:15px;">               <p style="font-size:12px; color:#999;">                 🔒 This chatbot is linked to your account. Do not share your login access.               </p>             </td>           </tr>          </table>          <!-- Footer -->         <p style="font-size:12px; color:#aaa; margin-top:15px;">           &copy; LavinderAI — AI FAQ Chatbot Service         </p>        </td>     </tr>   </table> """
     }
 
     requests.post(url, headers=headers, json=data)

@@ -350,8 +350,8 @@ def create():
             "is_paid": False,
             "is_live": False,
             "created_at": int(time.time()),
-            "expires_at": None
-        }
+            "expires_at": None,
+            "stats": {"visitors": 0,"questions": 0}}
 
         save_user(email_key, user)
 
@@ -409,6 +409,11 @@ def chatbot(slug):
 
                 if not bot.get("is_live") or (bot.get("expires_at") and now > bot["expires_at"]):
                     return "Not available or expired"
+
+                stats = data.get("stats", {})
+                stats["visitors"] = stats.get("visitors", 0) + 1
+                save_data(slug, {**data, "stats": stats})
+
   
                 return render_template("chatbot.html", data=bot, slug=slug)
 
@@ -505,6 +510,11 @@ def chat_api(slug):
 
     if not msg:
         return jsonify({"reply": "Empty message"})
+
+    stats = data.get("stats", {})
+    stats["questions"] = stats.get("questions", 0) + 1
+
+    save_data(slug, {**data, "stats": stats})
 
     system_prompt = instructions + bot.get("content", "")
     reply = ask_groq(system_prompt, msg)
@@ -700,6 +710,40 @@ def create_slash():
     return redirect("/create", code=301)
 
 
+@app.route("/stats/<slug>")
+def stats_page(slug):
+    data = get_data(slug)
+
+    if not data:
+        return "Not found", 404
+
+    # ❌ Not logged in
+    if "user_email" not in session:
+        return redirect("/login")  # your Google login route
+
+    # ❌ Not owner
+    if session["user_email"] != data.get("email"):
+        return "Unauthorized", 403
+
+    return render_template("stats.html", slug=slug)
+
+@app.route("/api/stats/<slug>")
+def stats_api(slug):
+    data = get_data(slug)
+
+    if not data:
+        return {"error": "Not found"}, 404
+
+    if "user_email" not in session:
+        return {"error": "Unauthorized"}, 403
+
+    if session["user_email"] != data.get("email"):
+        return {"error": "Unauthorized"}, 403
+
+    return data.get("stats", {})
+
+
+
 if __name__ == "__main__":
     print("🚀 Server starting...")
-    app.run(debug=True)
+    app.run()

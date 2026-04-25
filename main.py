@@ -578,7 +578,9 @@ def verify_payment(slug):
                 email_key = email.replace(".", "_")
                 requests.put(
                     f"{FIREBASE_URL}/users/{email_key}.json",json=user)
-                send_activation_email(email, slug)
+
+                real_email = user.get("email")  
+                send_activation_email(real_email, slug)
 
         return jsonify({"status": "success"})
 

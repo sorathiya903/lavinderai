@@ -161,18 +161,14 @@ def send_email(to_email, slug, secret_key):
         "Content-Type": "application/json"
     }
 
-    public_url = f"https://ai-faq-chatbot-for-businesses.onrender.com/{slug}"
-    dashboard_url = "https://ai-faq-chatbot-for-businesses.onrender.com/dashboard"
+    public_url = f"https://lavinderai.onrender.com/{slug}"
+    dashboard_url = "https://lavinderai.onrender.com/dashboard"
 
     data = {
         "from": "onboarding@resend.dev",
         "to": [to_email],
         "subject": "Chatbot Ready 🚀",
-        "html": f"""
-        <h2>Chatbot Ready</h2>
-        <p>Public: {public_url}</p>
-        <p>Dashboard: {dashboard_url}</p>
-        """
+        "html": f""" <div style="font-family: Arial, sans-serif; background:#f4f6fb; padding:20px;">      <div style="max-width:600px; margin:auto; background:white; border-radius:12px; padding:30px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">          <h2 style="color:#7c4dff; margin-bottom:10px;">🚀 Your Chatbot is Ready!</h2>          <p style="color:#555; font-size:15px;">       Your AI chatbot has been successfully created. You can now start using and managing it.     </p>      <div style="margin:25px 0;">              <p style="margin-bottom:8px; font-weight:bold;">🌐 Public Link</p>       <a href="{public_url}"           style="display:block; background:#edeaff; padding:12px; border-radius:8px; text-decoration:none; color:#333; font-size:14px;">          {public_url}       </a>      </div>      <div style="margin:25px 0;">              <p style="margin-bottom:8px; font-weight:bold;">⚙️ Dashboard Link</p>       <a href="{dashboard_url}"           style="display:block; background:#edeaff; padding:12px; border-radius:8px; text-decoration:none; color:#333; font-size:14px;">          {dashboard_url}       </a>      </div>  <p style="font-size:13px; color:#b26a00; background:#fff3cd; padding:10px; border-radius:8px;"> 🔐 You are signed in with Google. Do not share your account access with others.   Anyone with your account access can manage this chatbot. </p>      <hr style="margin:25px 0; border:none; border-top:1px solid #eee;">      <p style="font-size:13px; color:#888; text-align:center;">       Powered by <b>LavinderAI</b><br>       AI FAQ Chatbot for Businesses     </p>    </div>  </div>"""
     }
 
     try:
@@ -577,13 +573,11 @@ def verify_payment(slug):
                 bot["created_at"] = now
                 bot["expires_at"] = now + (30 * 24 * 60 * 60)
 
-                # DO NOT permanently trust is_live
-                
-
                 # update firebase
                 email_key = email.replace(".", "_")
                 requests.put(
                     f"{FIREBASE_URL}/users/{email_key}.json",json=user)
+                send_renewal_email(email, slug)
 
         return jsonify({"status": "success"})
 
@@ -668,7 +662,7 @@ def work_slash():
 
 @app.route("/create/")
 def create_slash():
-    return ("/create", code=301)
+    return redirect("/create", code=301)
 
 
 if __name__ == "__main__":

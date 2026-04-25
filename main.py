@@ -712,21 +712,24 @@ def create_slash():
 
 @app.route("/stats/<slug>")
 def stats_page(slug):
-    data = get_data(slug)
 
-    if not data:
-        return "Not found", 404
+    all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
 
-    # ❌ Not logged in
-    if "user_email" not in session:
-        return redirect("/login")  # your Google login route
+    bot_data = None
 
-    # ❌ Not owner
-    if session["user_email"] != data.get("email"):
-        return "Unauthorized", 403
+    for user in all_users.values():
+        chatbots = user.get("chatbots", {})
 
-    return render_template("stats.html", slug=slug)
+        if slug in chatbots:
+            bot_data = chatbots[slug]
+            break
 
+    if not bot_data:
+        return "Chatbot not found", 404
+
+    return render_template("stats.html", slug=slug, data=bot_data)
+
+    
 @app.route("/api/stats/<slug>")
 def stats_api(slug):
 

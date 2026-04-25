@@ -659,16 +659,16 @@ def howItWorks():
 
 @app.route("/terms/")
 def terms_slash():
-    return redirect("/terms", code=301)
+    return render_template('terms.html')
 
 @app.route("/how-it-works/")
 def work_slash():
-    return redirect("/how-it-works", code=301)
+    return render_template("how-it-works.html")
 
 
 @app.route("/create/")
 def create_slash():
-    return redirect("/create", code=301)
+    return ("/create", code=301)
 
 
 if __name__ == "__main__":

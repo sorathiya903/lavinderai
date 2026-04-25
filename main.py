@@ -73,18 +73,21 @@ def check_expired_bots():
             if bot.get("expires_at") and now > bot["expires_at"]:
 
                 if not bot.get("expiry_email_sent"):
-                    send_renewal_email(email, slug)
+                    success = send_renewal_email(email, slug)  # ✅ FIX
+
                     if success:
                         bot["expiry_email_sent"] = True
 
                 bot["is_live"] = False
                 bot["is_paid"] = False
 
-
                 email_key = safe_email_key(email)
-                requests.put(f"{FIREBASE_URL}/users/{email_key}.json", json=user)
-                )
 
+                requests.put(
+                    f"{FIREBASE_URL}/users/{email_key}.json",
+                    json=user
+                )
+                
 # ---------------- EMAIL ----------------
 @app.route("/logout")
 def logout():

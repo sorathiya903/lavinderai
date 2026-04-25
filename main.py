@@ -729,18 +729,45 @@ def stats_page(slug):
 
 @app.route("/api/stats/<slug>")
 def stats_api(slug):
-    data = get_data(slug)
 
-    if not data:
-        return {"error": "Not found"}, 404
+    all_users = requests.get(f"{FIREBASE_URL}/users.json").json()
 
-    if "user_email" not in session:
-        return {"error": "Unauthorized"}, 403
+    if not all_users:
+        return jsonify({
+            "error": "no_data",
+            "visitors": 0,
+            "questions": 0
+        })
 
-    if session["user_email"] != data.get("email"):
-        return {"error": "Unauthorized"}, 403
+    for user in all_users.values():
+        chatbots = user.get("chatbots", {})
 
-    return data.get("stats", {})
+        if slug in chatbots:
+            bot = chatbots[slug]
+
+            stats = bot.get("stats")
+
+            if not stats:
+                return jsonify({
+                    "slug": slug,
+                    "exists": True,
+                    "visitors": 0,
+                    "questions": 0
+                })
+
+            return jsonify({
+                "slug": slug,
+                "exists": True,
+                "visitors": stats.get("visitors", 0),
+                "questions": stats.get("questions", 0)
+            })
+
+    return jsonify({
+        "slug": slug,
+        "exists": False,
+        "visitors": 0,
+        "questions": 0
+    })
 
 
 

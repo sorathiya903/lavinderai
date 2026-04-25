@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LavinderAI Stats</title>
+
+<style>
+:root {
+  --bg: #0f172a;
+  --card: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.08);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #7c4dff;
+  --accent2: #22c55e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: var(--text);
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 30px 20px;
+}
+
+h1 {
+  font-size: 28px;
+  margin-bottom: 25px;
+}
+
+/* Cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  padding: 20px;
+  border-radius: 16px;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(124,77,255,0.4);
+}
+
+.label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.value {
+  font-size: 32px;
+  font-weight: bold;
+  margin-top: 8px;
+  background: linear-gradient(90deg, #7c4dff, #22c55e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Insight */
+.insight {
+  margin-top: 25px;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  font-size: 15px;
+}
+
+/* Bars */
+.bars {
+  margin-top: 25px;
+}
+
+.bar {
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 18px;
+  width: 0%;
+  background: linear-gradient(90deg, #7c4dff, #22c55e);
+  transition: width 0.8s ease;
+}
+
+/* Footer */
+.footer {
+  margin-top: 25px;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Glow title */
+.title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  background: rgba(124,77,255,0.2);
+  color: #c4b5fd;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+/* Skeleton shimmer */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.08);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.25),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    left: 150%;
+  }
+}
+  .bar {
+  width: 100%;
+  height: 18px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  background: rgba(255,255,255,0.08);
+}
+
+.fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #7c4dff, #22c55e);
+  transition: width 0.9s ease;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="title">
+    <h1>📊 Stats Dashboard</h1>
+ </div>
+
+  <!-- Cards -->
+  <div class="cards">
+    <div class="card">
+      <div class="label">Visitors</div>
+      <div class="value" id="visitors">0</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Questions</div>
+      <div class="value" id="questions">0</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Engagement</div>
+      <div class="value" id="engagement">0</div>
+    </div>
+  </div>
+
+  <!-- Insight -->
+  <div class="insight" id="insight">
+    Loading insights...
+  </div>
+
+  <!-- Bars -->
+  <div class="bars">
+  <div class="bar skeleton">
+    <div class="fill" id="visBar"></div>
+  </div>
+  <div class="bar skeleton">
+    <div class="fill" id="quesBar"></div>
+  </div>
+</div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div>Powered by LavinderAI</div>
+    <div id="time"></div>
+  </div>
+
+</div>
+
+<script>
+async function loadStats() {
+    let res = await fetch("/api/stats/{{ slug }}");
+    let data = await res.json();
+
+    let visitors = data.visitors || 0;
+    let questions = data.questions || 0;
+
+    document.getElementById("visitors").innerText = visitors;
+    document.getElementById("questions").innerText = questions;
+
+    let engagement = visitors ? (questions / visitors).toFixed(2) : 0;
+    document.getElementById("engagement").innerText = engagement;
+
+    let insight = "Low activity";
+    if (engagement > 2) insight = "🔥 Users are highly engaged";
+    else if (engagement > 1) insight = "👍 Good usage";
+
+    document.getElementById("insight").innerText =
+        `Users ask ~${engagement} questions per visit. ${insight}`;
+
+    let max = Math.max(visitors, questions, 1);
+
+    setTimeout(() => {
+    document.getElementById("visBar").style.width = (visitors / max * 100) + "%";
+    document.getElementById("quesBar").style.width = (questions / max * 100) + "%";
+
+    // remove skeleton effect
+    document.querySelectorAll(".bar").forEach(bar => {
+        bar.classList.remove("skeleton");
+    });
+}, 500);
+
+    document.getElementById("time").innerText =
+        "Updated: " + new Date().toLocaleTimeString();
+}
+
+loadStats();
+</script>
+
+</body>
+  </html>

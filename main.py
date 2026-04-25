@@ -6,9 +6,6 @@ import requests
 from authlib.integrations.flask_client import OAuth
 import razorpay
 import time
-from apscheduler.schedulers.background import BackgroundScheduler
-import atexit
-atexit.register(lambda: scheduler.shutdown())
 
 
 razorclient = razorpay.Client(auth=(os.getenv("RAZORPAY_KEY"), os.getenv("RAZORPAY_SECRET")))
@@ -663,9 +660,6 @@ def dashboard_data():
         "chatbots": user.get("chatbots", {})
     })
 # ---------------- RUN ----------------
-scheduler = BackgroundScheduler()
-scheduler.add_job(check_expired_bots, 'interval', minutes=1)
-scheduler.start()
 
 #seo relates 
 @app.route('/robots.txt')

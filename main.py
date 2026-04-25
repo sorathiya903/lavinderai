@@ -660,7 +660,16 @@ def dashboard_data():
         "chatbots": user.get("chatbots", {})
     })
 # ---------------- RUN ----------------
+@app.before_request
+def run_check():
+    check_expired_bots()
 
+@app.route("/cron-check")
+def cron_check():
+    check_expired_bots()
+    return "OK"
+
+    
 #seo relates 
 @app.route('/robots.txt')
 def robots_txt():

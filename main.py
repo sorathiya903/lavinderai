@@ -70,10 +70,10 @@ def check_expired_bots():
 
         for slug, bot in chatbots.items():
 
-            if bot.get("expires_at") and now > bot["expires_at"]:
+            if bot.get("expires_at") and now >= bot["expires_at"]:
 
                 if not bot.get("expiry_email_sent"):
-                    success = send_renewal_email(email, slug)  # ✅ FIX
+                    success = send_renewal_email(email, slug)  #  FIX
 
                     if success:
                         bot["expiry_email_sent"] = True

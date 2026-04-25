@@ -595,7 +595,6 @@ def debug_session():
 
 #chatbot expiry
 def send_renewal_email(email, slug):
-
     url = "https://api.resend.com/emails"
 
     headers = {
@@ -607,25 +606,20 @@ def send_renewal_email(email, slug):
         "from": "onboarding@resend.dev",
         "to": [email],
         "subject": "Your chatbot has expired ⚠️",
-        "html": f"""
-        <h2>Renew Your Chatbot</h2>
-        <p>Your chatbot <b>{slug}</b> has expired.</p>
-        <p>Pay ₹50 to reactivate it again.</p>
-        <a href='https://ai-faq-chatbot-for-businesses.onrender.com/dashboard'>
-        Go to Dashboard
-        </a>
-        """
+        "html": f"<h2>Expired</h2><p>{slug}</p>"
     }
 
     try:
         r = requests.post(url, headers=headers, json=data)
-        print("RENEW EMAIL:", r.status_code, r.text)
 
-        return r.status_code == 200  # return success
+        print("STATUS:", r.status_code)
+        print("RESPONSE:", r.text)
+
+        return r.status_code == 200
+
     except Exception as e:
-        print("EMAIL ERROR:", e)
+        print("ERROR:", e)
         return False
-
 
 def send_activation_email(email, slug):
 

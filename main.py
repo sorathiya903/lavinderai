@@ -392,6 +392,7 @@ def dashboard():
     )
 # ---------------- CHATBOT FETCH (FIXED) ----------------
 
+
 @app.route("/<slug>")
 def chatbot(slug):
 
@@ -400,25 +401,40 @@ def chatbot(slug):
     all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
 
     for email, user in all_users.items():
-        for s, bot in (user.get("chatbots") or {}).items():
+        chatbots = user.get("chatbots", {})
 
-            if s == slug:
-                print("FOUND BOT:", bot)
+        if slug in chatbots:
+            bot = chatbots[slug]
 
-                now = int(time.time())
+            print("FOUND BOT:", bot)
 
-                if not bot.get("is_live") or (bot.get("expires_at") and now > bot["expires_at"]):
-                    return "Not available or expired"
+            now = int(time.time())
 
-                stats = data.get("stats", {})
-                stats["visitors"] = stats.get("visitors", 0) + 1
-                save_data(slug, {**data, "stats": stats})
+            # expiry check
+            if not bot.get("is_live") or (bot.get("expires_at") and now > bot["expires_at"]):
+                return "Not available or expired"
 
-  
-                return render_template("chatbot.html", data=bot, slug=slug)
+            # -----------------------------
+            # FIXED STATS LOGIC
+            # -----------------------------
+            stats = bot.get("stats", {})
+
+            stats["visitors"] = stats.get("visitors", 0) + 1
+
+            bot["stats"] = stats  # update bot
+
+            # save back to Firebase user
+            email_key = email.replace(".", "_")
+
+            requests.put(
+                f"{FIREBASE_URL}/users/{email_key}.json",
+                json=user
+            )
+
+            return render_template("chatbot.html", data=bot, slug=slug)
 
     print("BOT NOT FOUND")
-    return "Chatbot not found"
+    return "Chatbot not found", 404
 
 
 # ---------------- LAUNCH ----------------
@@ -488,21 +504,24 @@ def chat_api(slug):
     now = int(time.time())
 
     bot = None
+    user_ref = None
 
-    for user in all_users.values():
-        for s, b in (user.get("chatbots") or {}).items():
-            if s == slug:
-                bot = b
-                break
+    # ---------------- FIND BOT ----------------
+    for email, user in all_users.items():
+        chatbots = user.get("chatbots", {})
+
+        if slug in chatbots:
+            bot = chatbots[slug]
+            user_ref = email
+            break
 
     if not bot:
         return jsonify({"reply": "Chatbot not found"})
 
-    #  NOT ACTIVE IF NOT PAID
+    # ---------------- CHECK STATUS ----------------
     if not bot.get("is_paid"):
         return jsonify({"reply": "This chatbot is not activated yet."})
 
-    #  EXPIRED CHECK (MOST IMPORTANT)
     if bot.get("expires_at") and now > bot["expires_at"]:
         return jsonify({"reply": "This chatbot has expired. Please renew."})
 
@@ -511,15 +530,27 @@ def chat_api(slug):
     if not msg:
         return jsonify({"reply": "Empty message"})
 
-    stats = data.get("stats", {})
+    # ---------------- UPDATE STATS ----------------
+    stats = bot.get("stats", {})
+
     stats["questions"] = stats.get("questions", 0) + 1
 
-    save_data(slug, {**data, "stats": stats})
+    bot["stats"] = stats
 
+    # save back to firebase
+    email_key = user_ref.replace(".", "_")
+
+    requests.put(
+        f"{FIREBASE_URL}/users/{email_key}.json",
+        json=all_users[user_ref]
+    )
+
+    # ---------------- AI RESPONSE ----------------
     system_prompt = instructions + bot.get("content", "")
     reply = ask_groq(system_prompt, msg)
 
     return jsonify({"reply": reply})
+
 
 @app.route("/check-slug/<slug>")
 def check_slug(slug):

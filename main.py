@@ -246,6 +246,28 @@ def price():
 def landing():
     return render_template("landing.html")
 
+
+@app.route("/test/<slug>")
+def test_chatbot(slug):
+
+    user = session.get("user")
+    if not user:
+        return redirect("/login")
+
+    email = user.get("email")
+    email_key = safe_email_key(email)
+
+    user_data = get_user(email_key)
+
+    bot = user_data.get("chatbots", {}).get(slug)
+
+    if not bot:
+        return "Bot not found"
+
+    return render_template("test-chatbot.html", slug=slug, bot=bot)
+
+
+
 @app.route("/delete/<slug>", methods=["POST"])
 def delete_chatbot(slug):
 

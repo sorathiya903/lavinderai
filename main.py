@@ -370,7 +370,7 @@ def create():
                 "name": name,
                 "email": email,
                 "chatbots": {},
-                'plan' ="free"
+                'plan' :"free"
             }
             # FIX: ensure chatbots always exists
         if "chatbots" not in user:

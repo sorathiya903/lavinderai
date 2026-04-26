@@ -2,7 +2,6 @@
 <html>
 <head>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
 
@@ -462,36 +461,7 @@ document.addEventListener("click", function(e) {
     }
 });
 
-async function launchBot(slug) {
 
-    let res = await fetch("/create-order/" + slug, {
-        method: "POST"
-    });
-
-    let data = await res.json();
-
-    var options = {
-        key: data.key,
-        amount: data.amount,
-        currency: "INR",
-        order_id: data.order_id,
-
-        handler: async function (response) {
-
-            await fetch("/verify-payment/" + slug, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(response)
-            });
-
-            alert("Bot launched successfully!");
-            window.location.href = "/" + slug;
-        }
-    };
-
-    var rzp = new Razorpay(options);
-    rzp.open();
-}
     function formatDate(ts) {
     let d = new Date(ts * 1000);
     return d.toLocaleString();

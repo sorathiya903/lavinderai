@@ -213,6 +213,81 @@ p {
     display: flex;
   }
 }
+    
+    h2 {
+  margin-top: 40px;
+  color: #22c55e;
+  font-size: 22px;
+}
+</style>
+    <style>
+/* Timeline */
+.timeline {
+  position: relative;
+  margin-top: 30px;
+  padding-left: 20px;
+  border-left: 2px solid rgba(255,255,255,0.1);
+}
+
+.timeline-item {
+  margin-bottom: 25px;
+  position: relative;
+  padding-left: 15px;
+}
+
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  background: #7c4dff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #7c4dff;
+}
+
+.timeline-title {
+  font-weight: bold;
+  color: #22c55e;
+  font-size: 15px;
+}
+
+.timeline-text {
+  font-size: 14px;
+  color: #cbd5e1;
+}
+
+/* Story highlight block */
+.story-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 20px;
+  border-radius: 14px;
+  margin-top: 20px;
+}
+
+/* subtle animation */
+.timeline-item {
+  opacity: 0;
+  transform: translateY(15px);
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.timeline-item:nth-child(1){animation-delay:0.1s}
+.timeline-item:nth-child(2){animation-delay:0.2s}
+.timeline-item:nth-child(3){animation-delay:0.3s}
+.timeline-item:nth-child(4){animation-delay:0.4s}
+.timeline-item:nth-child(5){animation-delay:0.5s}
+.timeline-item:nth-child(6){animation-delay:0.6s}
+.timeline-item:nth-child(7){animation-delay:0.7s}
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 </style>
 
 <script>
@@ -255,6 +330,99 @@ function toggleMenu() {
             and scalable backend architecture.
         </p>
     </div>
+    <div class="section">
+<div class="section">
+  <h2>Developer Story</h2>
+
+  <!-- Startup style intro -->
+  <div class="story-box">
+    <p>
+      LavinderAI is built by <span class="highlight">Aditya Sorathiya</span> as a personal project
+      that quickly evolved into a complete <span class="highlight">AI chatbot SaaS platform</span>.
+    </p>
+
+    <p>
+      What started as a simple idea turned into a fast-paced development journey focused on building,
+      improving, and scaling a real-world AI product.
+    </p>
+  </div>
+
+  <!-- Timeline UI -->
+  <div class="timeline">
+
+    <div class="timeline-item">
+      <div class="timeline-title">📅 21 April 2026 — The Beginning</div>
+      <div class="timeline-text">
+        Started with the idea of just creating the folder structure, but ended up building a working chatbot system on the same day.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-title">🤖 Day 2 — AI Integration</div>
+      <div class="timeline-text">
+        Added AI capabilities, transforming the chatbot into an intelligent assistant capable of answering user queries.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-title">🎨 UI Improvements</div>
+      <div class="timeline-text">
+        Focus shifted to improving the interface, making the chatbot clean, modern, and user-friendly.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-title">📊 Dashboard Creation</div>
+      <div class="timeline-text">
+        Built a complete dashboard for users to manage their chatbots easily.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-title">🔐 Authentication</div>
+      <div class="timeline-text">
+        Integrated Google authentication to ensure secure login and account management.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-title">📈 Stats System</div>
+      <div class="timeline-text">
+        Added analytics to track visitors and user questions for better insights.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-title">💰 Monetization & Payments</div>
+      <div class="timeline-text">
+        Started planning revenue model and integrated Razorpay for handling payments.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-title">🚀 Ongoing Growth</div>
+      <div class="timeline-text">
+        The platform continues to evolve with new features, improvements, and scalability plans.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Closing story -->
+  <div class="story-box">
+    <p>
+      What makes LavinderAI unique is how quickly it was built and improved —
+      going from a simple idea to a fully functional AI chatbot platform within days.
+    </p>
+
+    <p>
+      This project represents rapid development, continuous learning, and a strong focus on building
+      real-world AI tools for businesses and developers.
+    </p>
+  </div>
+
+</div>
+</div>
 
     <div class="footer">
         © 2026 LavinderAI — Developed by Aditya Sorathiya

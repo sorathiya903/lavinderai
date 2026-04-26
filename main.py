@@ -8,6 +8,7 @@ import razorpay
 import time
 from functools import wraps
 
+
 def require_pro_plan(f):
     @wraps(f)
     def wrapper(slug, *args, **kwargs):
@@ -18,13 +19,15 @@ def require_pro_plan(f):
             chatbots = user.get("chatbots", {})
 
             if slug in chatbots:
-                bot = chatbots[slug]
 
-                #  NOT PRO
-                if bot.get("plan") != "pro":
-                    return jsonify({"error": "upgrade_required", "message": "Upgrade to Pro to access stats", "upgrade_url": "/pricing"}), 403
+                # FIX: check USER plan, not bot
+                if user.get("plan") != "pro":
+                    return jsonify({
+                        "error": "upgrade_required",
+                        "message": "Upgrade to Pro to access stats",
+                        "upgrade_url": "/pricing"
+                    }), 403
 
-                #  pro then ok
                 return f(slug, *args, **kwargs)
 
         return jsonify({"error": "Chatbot not found"}), 404

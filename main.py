@@ -6,6 +6,30 @@ import requests
 from authlib.integrations.flask_client import OAuth
 import razorpay
 import time
+from functools import wraps
+
+def require_pro_plan(f):
+    @wraps(f)
+    def wrapper(slug, *args, **kwargs):
+
+        all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
+
+        for email, user in all_users.items():
+            chatbots = user.get("chatbots", {})
+
+            if slug in chatbots:
+                bot = chatbots[slug]
+
+                #  NOT PRO
+                if bot.get("plan") != "pro":
+                    return jsonify({"error": "upgrade_required", "message": "Upgrade to Pro to access stats", "upgrade_url": "/pricing"}), 403
+
+                #  pro then ok
+                return f(slug, *args, **kwargs)
+
+        return jsonify({"error": "Chatbot not found"}), 404
+
+    return wrapper
 
 
 razorclient = razorpay.Client(auth=(os.getenv("RAZORPAY_KEY"), os.getenv("RAZORPAY_SECRET")))
@@ -332,6 +356,14 @@ def create():
             return "❌ Invalid email"
 
         user = get_user(email_key)
+        if "plan" not in user:
+            user["plan"] = "free"
+        # ---------------- PLAN CHECK (LIMIT BOT CREATION) ----------------
+        if user.get("plan") != "pro":
+            chatbots = user.get("chatbots", {})
+            
+            if len(chatbots) >= 1:
+                return "❌ Free plan allows only 1 chatbot. Upgrade to Pro."
 
         if not user:
             user = {
@@ -349,12 +381,13 @@ def create():
 
         user["chatbots"][slug] = {
             "name": name,
+            "plan": "free",
+            "preview_used": 0
             "content": content,
             "secret": secrets.token_hex(8),
             "is_paid": False,
             "is_live": False,
             "created_at": int(time.time()),
-            "expires_at": None,
             "stats": {"visitors": 0,"questions": 0}}
 
         save_user(email_key, user)
@@ -445,12 +478,11 @@ def chatbot(slug):
 
 @app.route("/launch/<slug>", methods=["GET", "POST"])
 def launch(slug):
-    user = session.get("user")
-    if not user:
+    user_session = session.get("user")
+    if not user_session:
         return redirect("/login")
-        
-    email = user.get("email")
 
+    email = user_session.get("email")
     email_key = safe_email_key(email)
     user = get_user(email_key)
 
@@ -463,24 +495,19 @@ def launch(slug):
         return "Bot not found"
 
     if request.method == "POST":
-        print("LAUNCHING BOT:", slug)
 
-        bot["is_paid"] = True
+        # ✅ PLAN CHECK
+        if user.get("plan") != "pro":
+            return "❌ Upgrade to Pro to activate chatbot"
+
         bot["is_live"] = True
-        
-        bot["expires_at"] = int(time.time()) + (30 * 24 * 60 * 60)
-        
 
         save_user(email_key, user)
 
         return redirect(f"/{slug}")
 
-    return f"""
-    <h2>Launch {bot['name']}</h2>
-    <form method="POST">
-        <button>Pay & Launch</button>
-    </form>
-    """
+    return render_template("launch.html", bot=bot)
+
 
 @app.route("/preview/<slug>")
 def preview(slug):
@@ -519,16 +546,36 @@ def chat_api(slug):
             user_ref = email
             break
 
+    # ---------------- BOT NOT FOUND ----------------
     if not bot:
         return jsonify({"reply": "Chatbot not found"})
 
+    user_data = all_users[user_ref]
+
+    # ---------------- PLAN CHECK (FREE LIMIT) ----------------
+    remaining = None
+
+    if user_data.get("plan") != "pro":
+
+        preview_used = bot.get("preview_used", 0)
+
+        if preview_used >= 5:
+            return jsonify({
+                "reply": "Free preview limit reached. Upgrade to Pro."
+            })
+
+        # increment preview
+        bot["preview_used"] = preview_used + 1
+        remaining = 5 - (preview_used + 1)
+
     # ---------------- CHECK STATUS ----------------
-    if not bot.get("is_paid"):
+    if not bot.get("is_live"):
         return jsonify({"reply": "This chatbot is not activated yet."})
 
     if bot.get("expires_at") and now > bot["expires_at"]:
         return jsonify({"reply": "This chatbot has expired. Please renew."})
 
+    # ---------------- GET MESSAGE ----------------
     msg = request.json.get("message")
 
     if not msg:
@@ -536,12 +583,10 @@ def chat_api(slug):
 
     # ---------------- UPDATE STATS ----------------
     stats = bot.get("stats", {})
-
     stats["questions"] = stats.get("questions", 0) + 1
-
     bot["stats"] = stats
 
-    # save back to firebase
+    # ---------------- SAVE DATA ----------------
     email_key = user_ref.replace(".", "_")
 
     requests.put(
@@ -553,8 +598,10 @@ def chat_api(slug):
     system_prompt = instructions + bot.get("content", "")
     reply = ask_groq(system_prompt, msg)
 
-    return jsonify({"reply": reply})
-
+    return jsonify({
+        "reply": reply,
+        "remaining": remaining
+    })
 
 @app.route("/check-slug/<slug>")
 def check_slug(slug):
@@ -614,6 +661,7 @@ def verify_payment(slug):
             if slug in chatbots:
                 bot = chatbots[slug]
 
+                bot["plan"] = "pro"
                 bot["is_paid"] = True
                 bot["is_live"] = True
                 bot["created_at"] = now

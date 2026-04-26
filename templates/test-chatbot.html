@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Chatbot</title>
+
+<style>
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #f7f6fb;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+}
+
+.chat {
+  height: 400px;
+  overflow-y: auto;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.msg {
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.user { background: #7c4dff; color: white; text-align: right; }
+.bot { background: #eee; }
+
+input {
+  width: 70%;
+  padding: 10px;
+}
+
+button {
+  padding: 10px;
+  background: #7c4dff;
+  color: white;
+  border: none;
+}
+
+#limitBox {
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>🧪 Test AI Chatbot</h2>
+
+  <div id="limitBox"></div>
+
+  <div id="chat" class="chat"></div>
+
+  <br>
+
+  <input id="msg" placeholder="Type message...">
+  <button onclick="send()">Send</button>
+
+</div>
+
+<script>
+function addMessage(text, type) {
+    let div = document.createElement("div");
+    div.className = "msg " + type;
+    div.innerText = text;
+    document.getElementById("chat").appendChild(div);
+}
+
+function send() {
+
+    let msg = document.getElementById("msg").value;
+    if (!msg) return;
+
+    addMessage(msg, "user");
+    document.getElementById("msg").value = "";
+
+    fetch("/api/test-chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: msg})
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        addMessage(data.reply, "bot");
+
+        let box = document.getElementById("limitBox");
+
+        if (data.remaining !== undefined) {
+
+            if (data.remaining > 1) {
+                box.innerText = "Free messages left: " + data.remaining;
+                box.style.color = "green";
+            }
+            else if (data.remaining === 1) {
+                box.innerText = "⚠️ Last free message";
+                box.style.color = "orange";
+            }
+            else {
+                box.innerHTML = `
+                  Limit reached. 
+                  <a href="/pricing">Upgrade →</a>
+                `;
+                box.style.color = "red";
+
+                document.getElementById("msg").disabled = true;
+            }
+        }
+
+    });
+}
+</script>
+
+</body>
+</html>

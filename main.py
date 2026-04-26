@@ -616,13 +616,10 @@ def check_slug(slug):
 
     return jsonify({"available": True})
 
-
-
-
-@app.route("/create-order/<slug>", methods=["POST"])
-def create_order(slug):
+@app.route("/create-order", methods=["POST"])
+def create_order():
     data = {
-        "amount": 100,  # ₹1 = 100 paise (change as needed)
+        "amount": 25000,  # ₹250
         "currency": "INR",
         "payment_capture": 1
     }
@@ -636,50 +633,43 @@ def create_order(slug):
     })
 
 
-
-@app.route("/verify-payment/<slug>", methods=["POST"])
-def verify_payment(slug):
+@app.route("/verify-payment", methods=["POST"])
+def verify_payment():
     data = request.json
 
     try:
-        params = {
+        razorclient.utility.verify_payment_signature({
             "razorpay_order_id": data["razorpay_order_id"],
             "razorpay_payment_id": data["razorpay_payment_id"],
             "razorpay_signature": data["razorpay_signature"]
-        }
+        })
 
-        # verify signature
-        razorclient.utility.verify_payment_signature(params)
+        user_session = session.get("user")
+        if not user_session:
+            return jsonify({"status": "failed", "error": "Not logged in"})
 
-        # get all users
-        all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
+        email = user_session.get("email")
+        email_key = safe_email_key(email)
 
-        now = int(time.time())
+        user = get_user(email_key)
 
-        for email, user in all_users.items():
-            chatbots = user.get("chatbots") or {}
+        if not user:
+            return jsonify({"status": "failed", "error": "User not found"})
 
-            if slug in chatbots:
-                bot = chatbots[slug]
+        #  Upgrade plan
+        user["plan"] = "pro"
 
-                user["plan"] = "pro"
-                bot["is_paid"] = True
-                bot["is_live"] = True
-                bot["created_at"] = now
-                bot["expires_at"] = now + (30 * 24 * 60 * 60)
+        #  Optional: reset preview limits
+        for bot in (user.get("chatbots") or {}).values():
+            bot["preview_used"] = 0
 
-                # update firebase
-                email_key = email.replace(".", "_")
-                requests.put(
-                    f"{FIREBASE_URL}/users/{email_key}.json",json=user)
-
-                real_email = user.get("email")  
-                send_activation_email(real_email, slug)
+        save_user(email_key, user)
 
         return jsonify({"status": "success"})
 
     except Exception as e:
         return jsonify({"status": "failed", "error": str(e)})
+
 
 #debugging 
 
@@ -863,6 +853,26 @@ def stats_api(slug):
         "questions": 0
     })
 
+
+@app.route("/upgrade")
+def upgrade_page():
+    user_session = session.get("user")
+
+    if not user_session:
+        return redirect("/login")
+
+    email = user_session.get("email")
+    email_key = safe_email_key(email)
+    user = get_user(email_key)
+
+    if not user:
+        return redirect("/login")
+
+    # ensure plan exists
+    if "plan" not in user:
+        user["plan"] = "free"
+
+    return render_template("upgrade.html", user=user)
 
 
 if __name__ == "__main__":

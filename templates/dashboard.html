@@ -307,6 +307,9 @@ a {
   {% else %}
     <button onclick="window.location='/pricing'">🔒 Unlock Stats</button>
   {% endif %}
+  {% if user.plan != "pro" %}
+  <button onclick="testBot('{{ s }}')">Test (Free)</button>
+{% endif %}
 
   <!-- DELETE -->
   <form method="POST" action="/delete/{{ s }}" 
@@ -372,6 +375,9 @@ a {
   </div>
 </div>
 <script>
+  function testBot(slug) {
+    window.location.href = "/test/" + slug;
+  }
 document.querySelectorAll(".edit-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     const slug = btn.dataset.slug;

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Upgrade to Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui;
+  background: #0f172a;
+  color: #e2e8f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.card {
+  background: rgba(255,255,255,0.05);
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+h1 {
+  color: #7c4dff;
+}
+
+.price {
+  font-size: 32px;
+  margin: 15px 0;
+  color: #22c55e;
+}
+
+.features {
+  text-align: left;
+  margin: 20px 0;
+}
+
+.features li {
+  margin-bottom: 10px;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: #7c4dff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn:hover {
+  background: #6a3df0;
+}
+
+.note {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <h1>Upgrade to Pro 🚀</h1>
+
+  <div class="price">₹250 <span style="font-size:14px;">One-Time</span></div>
+
+  <ul class="features">
+    <li>✔ Unlimited chatbots</li>
+    <li>✔ Activate & host bots</li>
+    <li>✔ AI responses enabled</li>
+    <li>✔ Stats dashboard</li>
+    <li>✔ No branding</li>
+  </ul>
+
+  <!--  PAY BUTTON -->
+  <button class="btn" onclick="pay()">Pay & Upgrade</button>
+
+  <p class="note">Lifetime deal for early users</p>
+
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+function pay() {
+  fetch("/create-order", { method: "POST" })
+    .then(res => res.json())
+    .then(data => {
+
+      var options = {
+        key: data.key,
+        amount: data.amount,
+        currency: "INR",
+        name: "LavinderAI",
+        description: "Pro Upgrade",
+
+        order_id: data.order_id,
+
+        handler: function (response) {
+
+          fetch("/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(response)
+          })
+          .then(res => res.json())
+          .then(res => {
+            if (res.status === "success") {
+              alert("Payment successful! 🚀");
+              window.location = "/dashboard";
+            } else {
+              alert("Payment failed");
+            }
+          });
+
+        },
+
+        theme: { color: "#7c4dff" }
+      };
+
+      var rzp = new Razorpay(options);
+      rzp.open();
+
+    });
+}
+</script>
+
+</body>
+</html>

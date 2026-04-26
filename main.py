@@ -528,7 +528,6 @@ def preview(slug):
     return render_template("preview.html", data=bot, slug=slug)
 
 # ---------------- API CHAT ----------------
-
 @app.route("/api/chat/<slug>", methods=["POST"])
 def chat_api(slug):
 
@@ -553,6 +552,14 @@ def chat_api(slug):
 
     user_data = all_users[user_ref]
 
+    # ---------------- OWNER CHECK ----------------
+    session_user = session.get("user")
+    is_owner = False
+
+    if session_user:
+        if session_user.get("email") == user_ref:
+            is_owner = True
+
     # ---------------- PLAN CHECK (FREE LIMIT) ----------------
     remaining = None
 
@@ -565,12 +572,12 @@ def chat_api(slug):
                 "reply": "Free preview limit reached. Upgrade to Pro."
             })
 
-        # increment preview
         bot["preview_used"] = preview_used + 1
         remaining = 5 - (preview_used + 1)
 
     # ---------------- CHECK STATUS ----------------
-    if not bot.get("is_live"):
+    # Allow owner to test even if not live
+    if not bot.get("is_live") and not is_owner:
         return jsonify({"reply": "This chatbot is not activated yet."})
 
     if bot.get("expires_at") and now > bot["expires_at"]:
@@ -603,6 +610,7 @@ def chat_api(slug):
         "reply": reply,
         "remaining": remaining
     })
+
 
 @app.route("/check-slug/<slug>")
 def check_slug(slug):

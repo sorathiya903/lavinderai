@@ -247,7 +247,9 @@ a {
         </a>
       </div>
     </h3>
-    {% if user.chatbots %}
+    
+  
+{% if user.chatbots %}
 {% for s, bot in user.chatbots.items() %}
 
 <div style="background:white; padding:15px; margin:10px 0; border-radius:12px; border:1px solid #eee;">
@@ -263,56 +265,63 @@ a {
 
   <br><br>
 
-  <!-- ACTION BUTTONS -->
-  <button 
-  class="edit-btn"
-  data-slug="{{ s }}"
-  data-name="{{ bot.name }}"
-  data-content="{{ bot.content }}"
->
-  Edit
+  <!-- BASIC ACTIONS -->
+  <button class="edit-btn"
+    data-slug="{{ s }}"
+    data-name="{{ bot.name }}"
+    data-content="{{ bot.content }}">
+    Edit
   </button>
-     <button onclick="openPreview('{{ s }}')">Preview</button>
 
+  <button onclick="openPreview('{{ s }}')">Preview</button>
   <button onclick="makeQR('{{ s }}')">QR</button>
   <button onclick="downloadQR('{{ s }}')">Download QR</button>
 
-  <button onclick="launchBot('{{ s }}')">Pay & Launch</button>
+  <!-- 🔥 PLAN BASED BUTTON -->
+  {% if user.plan != "pro" %}
+    <button onclick="window.location='/pricing'">
+      🔒 Upgrade to Activate
+    </button>
+  {% else %}
+    {% if not bot.is_live %}
+      <button onclick="activateBot('{{ s }}')">
+        Activate Chatbot
+      </button>
+    {% else %}
+      <span class="badge live">ACTIVE</span>
+    {% endif %}
+  {% endif %}
 
-
-  
+  <!-- OPEN -->
+  {% if bot.is_live %}
   <a href="/{{ s }}" target="_blank">
     <button>Open</button>
   </a>
+  {% endif %}
 
-    
-  <a href="/stats/{{ s }}" target="_blank">
-    <button>View Stats</button>
-  </a>
+  <!-- STATS -->
+  {% if user.plan == "pro" %}
+    <a href="/stats/{{ s }}" target="_blank">
+      <button>View Stats</button>
+    </a>
+  {% else %}
+    <button onclick="window.location='/pricing'">🔒 Unlock Stats</button>
+  {% endif %}
 
   <!-- DELETE -->
   <form method="POST" action="/delete/{{ s }}" 
         onsubmit="return confirm('Delete this chatbot?');">
     <button style="background:red;">Delete</button>
   </form>
+
   <button onclick="openDetails('{{ s }}')">Details</button>
 
-  <!-- QR BOX -->
   <div id="qr-{{ s }}" style="display:none;margin-top:10px;"></div>
 
 </div>
 
 {% endfor %}
 {% else %}
-
-<!-- EMPTY STATE -->
-<div style="text-align:center; padding:30px; color:gray;">
-  <h3>No Chatbots Yet</h3>
-  <p>Create your first chatbot 🚀</p>
-</div>
-
-{% endif %}
-
             <!-- EDIT MODAL -->
 <div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
 
@@ -509,6 +518,32 @@ function closeDetails() {
     document.getElementById("bottomSheet").classList.remove("active");
 }
     
-</script>
+
+
+    function activateBot(slug) {
+
+    if (!confirm("Activate this chatbot?")) return;
+
+    fetch("/launch/" + slug, {
+        method: "POST"
+    })
+    .then(res => {
+        if (res.redirected) {
+            window.location.href = res.url;
+        } else {
+            return res.text();
+        }
+    })
+    .then(data => {
+        if (data) alert(data);
+        location.reload();
+    })
+    .catch(err => {
+        alert("Error activating chatbot");
+        console.error(err);
+    });
+}
+
+  </script> 
 </body>
   </html>

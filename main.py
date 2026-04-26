@@ -760,7 +760,13 @@ def stats_page(slug):
 
     return render_template("stats.html", slug=slug, data=bot_data)
 
-    
+
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+
 @app.route("/api/stats/<slug>")
 def stats_api(slug):
 

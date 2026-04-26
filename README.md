@@ -7,8 +7,7 @@ An AI-powered SaaS tool that allows businesses to create and deploy their own FA
 ---
 
 ## 🚀 Live Demo
-👉 https://messagegpt.indevs.in  
-*(Demo shows general AI capability, not the final FAQ chatbot product)*
+👉 https://lavinderai.onrender.com
 
 ---
 
@@ -36,7 +35,7 @@ An AI-powered SaaS tool that allows businesses to create and deploy their own FA
 1. Enter your business name  
 2. Add FAQ / content  
 3. Click **Generate Chatbot**  
-4. Get a unique link like: https://yourdomain.com/my-business
+4. Get a unique link like: https://lavinderai.onrender.com/my-business
 5. Share it with your customers 🚀  
 
 ---
@@ -53,8 +52,8 @@ An AI-powered SaaS tool that allows businesses to create and deploy their own FA
 
 ## 💰 Pricing Idea (For SaaS)
 
-- ₹49/month → Basic chatbot  
-- Custom domain → Extra charges  
-- Advanced UI → Extra charges  
+- ₹50/30 days → Basic chatbot  
+- Custom domain → Extra charges  (Coming soon)
+- Advanced UI → Extra charges  (Coming soon)
 
 ---

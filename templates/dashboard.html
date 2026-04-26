@@ -176,6 +176,29 @@ a {
   font-weight: bold;
   margin-bottom: 15px;
 }
+  .plan-badge {
+  margin-top: 10px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  display: inline-block;
+  font-weight: 600;
+}
+
+/* FREE */
+.plan-badge.free {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+  border: 1px solid #94a3b8;
+}
+
+/* PRO */
+.plan-badge.pro {
+  background: rgba(124, 77, 255, 0.2);
+  color: #7c4dff;
+  border: 1px solid #7c4dff;
+  box-shadow: 0 0 10px rgba(124,77,255,0.3);
+    }
 </style>
 </head>
 
@@ -187,22 +210,28 @@ a {
   <div class="logo">Chatbot Dashboard</div>
 
   <div class="profile" onclick="toggleMenu()">
-    <img src="{{ picture }}" alt="">
+  <img src="{{ picture }}" alt="">
+</div>
+
+<div id="profileMenu" class="profile-menu">
+  <p><b>{{ user.name }}</b></p>
+  <p style="font-size:12px;color:gray;">{{ user.email }}</p>
+
+  <!--  PLAN BADGE -->
+  <div class="plan-badge {{ user.plan }}">
+    {{ user.plan|capitalize }} Plan
   </div>
 
-  <div id="profileMenu" class="profile-menu">
-    <p><b>{{ user.name }}</b></p>
-    <p style="font-size:12px;color:gray;">{{ user.email }}</p>
+  <hr>
 
-    <hr>
+  <a href="/pricing">Upgrade</a>
+  <a href="/logout">Logout</a>
 
-    <a href="/logout">Logout</a>
-
-    <form method="POST" action="/delete-account" 
-          onsubmit="return confirm('Delete your account permanently?');">
-      <button class="danger">Delete Account</button>
-    </form>
-  </div>
+  <form method="POST" action="/delete-account" 
+        onsubmit="return confirm('Delete your account permanently?');">
+    <button class="danger">Delete Account</button>
+  </form>
+</div>
 </div>
 
 <div class="container">

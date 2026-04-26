@@ -214,6 +214,10 @@ def ask_groq(system_prompt, user_msg):
 
 # ---------------- ROUTES ----------------
 
+@app.route('/pricing')
+def price():
+    return render_template("price.html")
+
 @app.route("/")
 def landing():
     return render_template("landing.html")

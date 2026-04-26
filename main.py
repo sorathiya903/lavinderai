@@ -369,7 +369,8 @@ def create():
             user = {
                 "name": name,
                 "email": email,
-                "chatbots": {}
+                "chatbots": {},
+                'plan' ="free"
             }
             # FIX: ensure chatbots always exists
         if "chatbots" not in user:
@@ -381,8 +382,8 @@ def create():
 
         user["chatbots"][slug] = {
             "name": name,
-            "plan": "free",
-            "preview_used": 0
+            
+            "preview_used": 0,
             "content": content,
             "secret": secrets.token_hex(8),
             "is_paid": False,
@@ -425,7 +426,7 @@ def dashboard():
         "dashboard.html",
         email=email,
         user=user,
-        picture=user_session.get("picture")
+        picture=user_session.get("picture"), plan = user["plan"]
     )
 # ---------------- CHATBOT FETCH (FIXED) ----------------
 
@@ -630,7 +631,7 @@ def create_order(slug):
 
     return jsonify({
         "order_id": order["id"],
-        "amount": 100,
+        "amount": 25000,
         "key": os.getenv("RAZORPAY_KEY")
     })
 
@@ -661,7 +662,7 @@ def verify_payment(slug):
             if slug in chatbots:
                 bot = chatbots[slug]
 
-                bot["plan"] = "pro"
+                user["plan"] = "pro"
                 bot["is_paid"] = True
                 bot["is_live"] = True
                 bot["created_at"] = now
@@ -820,6 +821,7 @@ def about():
 
 
 @app.route("/api/stats/<slug>")
+@require_pro_plan
 def stats_api(slug):
 
     all_users = requests.get(f"{FIREBASE_URL}/users.json").json()

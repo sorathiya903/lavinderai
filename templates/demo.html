@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ bot.name }}</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #f5f6ff;
+}
+
+/* TOP BAR */
+.topbar {
+  background: white;
+  padding: 15px;
+  font-weight: bold;
+  color: #7c4dff;
+  border-bottom: 1px solid #eee;
+}
+
+/* MAIN CARD */
+.container {
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 10px;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* CHAT BOX */
+.chat-box {
+  height: 400px;
+  overflow-y: auto;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+/* MESSAGES */
+.msg {
+  margin: 8px 0;
+}
+
+.user {
+  text-align: right;
+  color: #333;
+}
+
+.bot {
+  text-align: left;
+  color: #7c4dff;
+}
+
+/* INPUT AREA */
+.input-box {
+  display: flex;
+  gap: 8px;
+}
+
+input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+button {
+  background: #7c4dff;
+  color: white;
+  border: none;
+  padding: 12px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #6a3df0;
+}
+
+/* SMALL INFO */
+.info {
+  font-size: 12px;
+  color: gray;
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  🚀 {{ bot.name }}
+</div>
+
+<div class="container">
+
+  <div class="card">
+
+    <!-- CHAT AREA -->
+    <div id="chatBox" class="chat-box"></div>
+
+    <!-- INPUT -->
+    <div class="input-box">
+      <input id="msg" placeholder="Type your message...">
+      <button onclick="sendMsg()">Send</button>
+    </div>
+
+    <div class="info">
+      This is a live demo chatbot powered by LavinderAI.
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+function addMsg(text, type) {
+  let box = document.getElementById("chatBox");
+  let div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendMsg() {
+  let input = document.getElementById("msg");
+  let msg = input.value.trim();
+
+  if (!msg) return;
+
+  addMsg(msg, "user");
+  input.value = "";
+
+  addMsg("Typing...", "bot");
+
+  let res = await fetch("/api/demo-chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ message: msg })
+  });
+
+  let data = await res.json();
+
+  // remove typing
+  let box = document.getElementById("chatBox");
+  box.removeChild(box.lastChild);
+
+  addMsg(data.reply, "bot");
+}
+
+</script>
+
+</body>
+</html>

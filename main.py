@@ -381,8 +381,11 @@ def create():
             return "❌ Invalid email"
 
         user = get_user(email_key)
-        if "plan" not in user:
-            user["plan"] = "free"
+        if not user:
+        user = {"name": name, "email": email,"chatbots": {}, "plan": "free"}
+        else:
+            if "plan" not in user:
+                user["plan"] = "free"
         # ---------------- PLAN CHECK (LIMIT BOT CREATION) ----------------
         if user.get("plan") != "pro":
             chatbots = user.get("chatbots", {})
@@ -451,7 +454,7 @@ def dashboard():
         "dashboard.html",
         email=email,
         user=user,
-        picture=user_session.get("picture"), plan = user["plan"]
+        picture=user_session.get("picture"), plan = user.get("plan", "free")
     )
 # ---------------- CHATBOT FETCH (FIXED) ----------------
 

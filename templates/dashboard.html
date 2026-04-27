@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard</title>
@@ -345,7 +346,24 @@ a {
   </div>
 
   <!-- SECONDARY ACTIONS -->
-  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+  <div style="
+  display: flex;
+  gap: 10px;
+  overflow-x: scroll;
+  padding: 8px 4px;
+  white-space: nowrap;
+  scrollbar-width: none;scroll-behavior: smooth;
+  -ms-overflow-style: none;
+">
+  
+  <!-- hide scrollbar for Chrome -->
+  <style>
+    .scroll-bar::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+
+  <div class="scroll-bar" style="display:flex; gap:10px;">
 
     <button class="edit-btn"
       data-slug="{{ s }}"
@@ -368,23 +386,27 @@ a {
       <button onclick="window.location='/pricing'">🔒 Stats</button>
     {% endif %}
 
-  </div>
+    {% if user.plan == "pro" %}
+      <button onclick="toggleGraph('{{ s }}', this)">📊 Graph</button>
+    {% endif %}
 
-  <!-- UTILITIES -->
-  <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
     <button onclick="makeQR('{{ s }}')">QR</button>
     <button onclick="downloadQR('{{ s }}')">Download</button>
     <button onclick="openDetails('{{ s }}')">Details</button>
 
-    <form method="POST" action="/delete/{{ s }}" 
-          onsubmit="return confirm('Delete this chatbot?');">
+    <form method="POST" action="/delete/{{ s }}" onsubmit="return confirm('Delete this chatbot?');">
       <button style="background:red;">Delete</button>
     </form>
+
+  </div>
   </div>
 
   <div id="qr-{{ s }}" style="display:none;margin-top:10px;"></div>
 
 </div>
+    <div id="graph-box-{{ s }}" style="display:none; margin-top:10px; background:#fff; padding:10px; border-radius:10px;">
+  <canvas id="graph-{{ s }}" height="120"></canvas>
+    </div>
 
 {% endfor %}
 {% else %}
@@ -625,6 +647,63 @@ function closeDetails() {
         console.error(err);
     });
 }
+  const graphCache = {};
+
+async function toggleGraph(slug, btn) {
+    let box = document.getElementById("graph-box-" + slug);
+
+    // CLOSE
+    if (box.style.display === "block") {
+        box.style.display = "none";
+        btn.innerText = "📊 Show Graph";
+        return;
+    }
+
+    // OPEN
+    box.style.display = "block";
+    btn.innerText = "❌ Hide Graph";
+
+    // avoid re-fetch
+    if (graphCache[slug]) return;
+
+    try {
+        let res = await fetch("/api/stats/" + slug);
+        let data = await res.json();
+
+        let ctx = document.getElementById("graph-" + slug).getContext("2d");
+
+        graphCache[slug] = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: ["Visitors", "Questions"],
+                datasets: [{
+                    label: "Stats",
+                    data: [
+                        data.visitors || 0,
+                        data.questions || 0
+                    ],
+                    borderColor: "#7c4dff",
+                    backgroundColor: "rgba(124,77,255,0.2)",
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error("Graph error", err);
+        box.innerHTML = "Failed to load graph";
+    }
+  }
 
   </script> 
 </body>

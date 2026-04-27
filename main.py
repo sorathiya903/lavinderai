@@ -382,7 +382,7 @@ def create():
 
         user = get_user(email_key)
         if not user:
-        user = {"name": name, "email": email,"chatbots": {}, "plan": "free"}
+            user = {"name": name, "email": email,"chatbots": {}, "plan": "free"}
         else:
             if "plan" not in user:
                 user["plan"] = "free"

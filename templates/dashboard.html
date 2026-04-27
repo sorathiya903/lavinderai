@@ -223,7 +223,9 @@ a {
 
   <hr>
 
+  {% if user.plan == "free" %}
   <a href="/pricing">Upgrade</a>
+{% endif %}
   <a href="/logout">Logout</a>
 
   <form method="POST" action="/delete-account" 

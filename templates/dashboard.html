@@ -198,6 +198,57 @@ a {
   border: 1px solid #7c4dff;
   box-shadow: 0 0 10px rgba(124,77,255,0.3);
     }
+<style>
+.skeleton {
+  background: #e9e9ef;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150px;
+  height: 100%;
+  width: 150px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.6),
+    transparent
+  );
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(400px);
+  }
+}
+
+.skel-line {
+  height: 12px;
+  margin: 10px 0;
+  border-radius: 6px;
+}
+
+.skel-title {
+  height: 18px;
+  width: 60%;
+}
+
+.skel-text {
+  height: 12px;
+  width: 90%;
+}
+
+.skel-text.short {
+  width: 70%;
+}
+</style>
+
 </style>
 </head>
 
@@ -506,8 +557,12 @@ document.addEventListener("click", function(e) {
 async function openDetails(slug) {
 
     document.getElementById("bottomSheet").classList.add("active");
-    document.getElementById("detailsContent").innerHTML = "Loading...";
-
+     document.getElementById("detailsContent").innerHTML = `
+  <div class="skeleton skel-line skel-title"></div>
+  <div class="skeleton skel-line skel-text"></div>
+  <div class="skeleton skel-line skel-text short"></div>
+  <div class="skeleton skel-line skel-text"></div>
+`;
     try {
         let res = await fetch("/api/dashboard-data");
         let data = await res.json();
@@ -533,7 +588,7 @@ async function openDetails(slug) {
             <p><b>Name:</b> ${bot.name}</p>
             <p><b>Status:</b> ${status}</p>
             <p><b>Created:</b> ${created}</p>
-            <p><b>Expires:</b> ${expires}</p>
+             
         `;
 
     } catch (err) {

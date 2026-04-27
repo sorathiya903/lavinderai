@@ -918,6 +918,43 @@ def upgrade_page():
     return render_template("upgrade.html", user=user)
 
 
+
+@app.route("/api/demo-chat", methods=["POST"])
+def demo_chat():
+
+    msg = request.json.get("message")
+
+    bot = requests.get(f"{FIREBASE_URL}/demo_bot.json").json()
+
+    if not bot:
+        return jsonify({"reply": "Demo not available"})
+
+    bot["stats"]["questions"] = bot["stats"].get("questions", 0) + 1
+
+    # save stats
+    requests.put(f"{FIREBASE_URL}/demo_bot.json", json=bot)
+
+    system_prompt = instructions + bot.get("content", "")
+    reply = ask_groq(system_prompt, msg)
+
+    return jsonify({"reply": reply})
+
+@app.route("/demo")
+def demo():
+
+    data = requests.get(f"{FIREBASE_URL}/demo_bot.json").json()
+
+    if not data:
+        return "Demo not configured"
+
+    # optional stats update
+    data["stats"] = data.get("stats", {})
+    data["stats"]["visitors"] = data["stats"].get("visitors", 0) + 1
+
+    requests.put(f"{FIREBASE_URL}/demo_bot.json", json=data)
+
+    return render_template("demo.html", bot=data)
+
 if __name__ == "__main__":
     print("🚀 Server starting...")
     app.run()

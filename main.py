@@ -144,7 +144,6 @@ def delete_account():
     return redirect("/")
 
 
-
 @app.route("/auth/google/callback")
 def google_callback():
     token = google.authorize_access_token()
@@ -165,14 +164,22 @@ def google_callback():
     email_key = safe_email_key(email)
     user = get_user(email_key)
 
+    # 
     if not user:
         user = {
             "email": email,
             "name": user_info.get("name"),
             "picture": picture,
-            "chatbots": {}
+            "chatbots": {},
+            "plan": "free"
         }
         save_user(email_key, user)
+
+    else:
+        # safety for old users
+        if "plan" not in user:
+            user["plan"] = "free"
+            save_user(email_key, user)
 
     return redirect("/dashboard")
 

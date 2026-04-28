@@ -112,7 +112,7 @@ POST /api/chat/<slug>
 
 **Example Request:**
 ```bash
-curl -X POST https://lavinderai.onrender.com/api/chat/demo-bot \
+curl -X POST https://lavinderai-yp7v.onrender.com/api/chat/demo-bot \
 -H "Content-Type: application/json" \
 -d '{"message":"Hello"}'
 ```

@@ -15,7 +15,7 @@
 ---
 
 ## 🌐 Live Demo
-👉 https://lavinderai.onrender.com
+👉 https://lavinderai-production.up.railway.app
 
 ---
 

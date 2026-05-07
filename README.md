@@ -166,7 +166,7 @@ Response:
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/your-username/lavinderai.git
+git clone https://github.com/sorathiya903/lavinderai.git
 cd lavinderai
 ```
 2. Create Virtual Environment

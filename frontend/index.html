@@ -1,1 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="google-site-verification" content="GvW7T5LYInUv3yR8fZ-I-G8S64OuTROy9c1elax_Zws" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
+  <title>LavinderAI - AI FAQ Chatbot for Businesses</title>
+
+  <meta name="description" content="Create AI-powered FAQ chatbots for your business in seconds. No coding required. Automate customer support with LavinderAI.">
+
+  <meta name="keywords" content="AI chatbot, FAQ chatbot, business chatbot, customer support AI, chatbot builder">
+
+  <meta name="robots" content="index, follow">
+
+  <link rel="canonical" href="https://lavinderai.netlify.app">
+
+  
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f7f6fb;
+      color: #222;
+    }
+
+    
+
+    .logo {
+      font-size:10px;
+      font-weight: bold;
+      color: #7c4dff;
+    }
+
+    .btn {
+      background: #7c4dff;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .hero h1 {
+      font-size: 35px;
+      color: #7c4dff;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: #555;
+      max-width: 600px;
+      margin: 20px auto;
+    }
+
+    .hero button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 10px;
+    }
+
+    .section {
+      padding: 20px 20px;
+      text-align: center;
+    }
+
+    .section h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 250px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .steps {
+      max-width: 700px;
+      margin: auto;
+      text-align: left;
+    }
+
+    .steps p {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      font-size: 14px;
+      color: #777;
+    }
+
+  </style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-container">
+
+    <!-- LOGO -->
+    <div class="logo" onclick="location.href='/'">
+      LavinderAI
+    </div>
+
+    <!-- DESKTOP MENU -->
+    <nav class="nav-links" id="navLinks">
+      <a href="/" class="active">Home</a>
+<a href="/pricing">Pricing</a>
+<a href="/how-it-works">How It Works</a>
+<a href="/about">About</a>
+<a href="/dashboard">Dashboard</a>
+    </nav>
+
+    <!-- CTA BUTTON -->
+    <a href="/create" class="cta-btn">Get Started</a>
+
+    <!-- HAMBURGER -->
+    <div class="menu-toggle" onclick="toggleMenu()">
+      ☰
+    </div>
+
+  </div>
+</header>
+
+<style>
+/* NAVBAR */
+  .nav-links a.active {
+  color: #7c4dff;
+}
+
+.nav-links a.active::after {
+  width: 100%;
+}
+.navbar {
+  background: white;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* CONTAINER */
+.nav-container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* LOGO */
+.logo {
+  font-size: 25px;
+  font-weight: bold;
+  color: #7c4dff;
+  cursor: pointer;
+}
+
+/* NAV LINKS */
+.nav-links {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+
+.nav-links a {
+  color: #555;
+  text-decoration: none;
+  font-size: 15px;
+  position: relative;
+  padding: 5px 0;
+  transition: 0.3s;
+}
+
+/* HOVER UNDERLINE EFFECT */
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 0%;
+  height: 2px;
+  background: #7c4dff;
+  transition: 0.3s;
+}
+
+.nav-links a:hover {
+  color: #7c4dff;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+/* CTA BUTTON */
+.cta-btn {
+  background: #7c4dff;
+  color: white;
+  padding: 9px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.cta-btn:hover {
+  background: #6a3df0;
+  transform: translateY(-1px);
+}
+
+/* HAMBURGER */
+.menu-toggle {
+  display: none;
+  font-size: 22px;
+  color: #7c4dff;
+  cursor: pointer;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+  .nav-links {
+    position: absolute;
+    top: 65px;
+    right: 15px;
+    background: white;
+    flex-direction: column;
+    padding: 15px;
+    border-radius: 10px;
+    display: none;
+    width: 220px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  }
+
+  .nav-links a {
+    padding: 10px;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .cta-btn {
+    display: none;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+}
+</style>
+
+<script>
+function toggleMenu() {
+  document.getElementById("navLinks").classList.toggle("active");
+}
+</script>
+
+<section class="hero">
+  <h1>AI FAQ Chatbot for Businesses - Create Chatbots in Seconds</h1>
+  <p>
+    LavinderAI lets you build smart AI-powered FAQ chatbots for your business.  
+    No coding, no setup — just enter your content and get a live chatbot instantly.
+  </p>
+  <button class="btn" onclick="location.href='/create'">Create Your Chatbot</button>
+</section>
+
+<section class="section">
+  <h2>What is LavinderAI?</h2>
+  <p style="max-width:600px;margin:auto;color:#555;">
+    LavinderAI is a SaaS platform that converts your business information into a smart AI chatbot.  
+    It answers customer questions instantly using your custom data and AI intelligence.
+  </p>
+</section>
+<section class="section">
+  <h2>What is an AI FAQ Chatbot?</h2>
+  <p style="max-width:700px;margin:auto;color:#555;">
+    An AI FAQ chatbot is a smart tool that automatically answers customer questions using artificial intelligence.
+    Businesses use AI chatbots to provide instant support, reduce workload, and improve customer satisfaction.
+    LavinderAI helps you create a powerful FAQ chatbot without coding.
+  </p>
+</section>
+
+<section class="section">
+  <h2>Benefits of Using an AI Chatbot</h2>
+  <div class="steps">
+    <p>✔ 24/7 customer support without human effort</p>
+    <p>✔ Faster response time for users</p>
+    <p>✔ Reduce repetitive queries</p>
+    <p>✔ Improve user engagement and conversions</p>
+  </div>
+</section>
+<section class="section">
+  <h2>Features</h2>
+  <div class="features">
+    <div class="card">
+      <h3>⚡ Instant Setup</h3>
+      <p>Create your chatbot in under 1 minute.</p>
+    </div>
+    <div class="card">
+      <h3>🤖 AI Powered</h3>
+      <p>Smart answers using advanced AI models.</p>
+    </div>
+    <div class="card">
+      <h3>🔗 Custom Link</h3>
+      <p>Get your own chatbot URL instantly.</p>
+    </div>
+    <div class="card">
+      <h3>📊 Saves FAQ</h3>
+      <p>Automatically learns and improves answers.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>How to Use</h2>
+  <div class="steps">
+    <p>1️⃣ Enter your business name and details</p>
+    <p>2️⃣ Provide FAQ content or system prompt</p>
+    <p>3️⃣ Get your chatbot link instantly</p>
+    <p>4️⃣ Share it with your users or embed it</p>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Why Choose LavinderAI?</h2>
+  <p style="max-width:600px;margin:auto;color:#555;">
+    Save time answering repetitive questions. Improve customer experience.  
+    Let AI handle your support while you focus on growth.
+  </p>
+</section>
+
+  <section style="background:#f7f6fb; padding:60px 20px; text-align:center;">
+  
+  <h2 style="font-size:28px; margin-bottom:10px;">🔐 Security You Can Trust</h2>
+  <p style="color:#666; max-width:600px; margin:0 auto 30px;">
+    Your data and chatbots are protected with modern security standards. We focus on safety, privacy, and full user control.
+  </p>
+
+  <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px; max-width:900px; margin:0 auto;">
+    
+    <div style="background:white; padding:20px; border-radius:12px; width:250px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+      <h3>🔑 Google Authentication</h3>
+      <p style="color:gray; font-size:14px;">
+        Secure login using Google OAuth. No passwords stored on our servers.
+      </p>
+    </div>
+
+    <div style="background:white; padding:20px; border-radius:12px; width:250px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+      <h3>🛡️ Encrypted Data</h3>
+      <p style="color:gray; font-size:14px;">
+        All user data is stored securely in Firebase with encrypted communication.
+      </p>
+    </div>
+
+    <div style="background:white; padding:20px; border-radius:12px; width:250px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+      <h3>👤 Full User Control</h3>
+      <p style="color:gray; font-size:14px;">
+        You can delete your account and data anytime with one click.
+      </p>
+    </div>
+
+    <div style="background:white; padding:20px; border-radius:12px; width:250px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+      <h3>🔒 Secure API Access</h3>
+      <p style="color:gray; font-size:14px;">
+        Chatbot APIs are protected with unique secret keys per bot.
+      </p>
+    </div>
+
+  </div>
+
+  <p style="margin-top:30px; color:#888; font-size:13px;">
+    We never sell or misuse your data. Your privacy is our priority.
+  </p>
+
+  </section>
+<section class="section">
+  <h2>Start Now</h2>
+  <p>Create your first chatbot for free.</p>
+  <button class="btn" onclick="location.href='/create'">Get Started</button>
+</section>
+
+<footer>
+  &copy; 2026 LavinderAI • Built for businesses 🚀 <br>
+  <a href="/terms">By using LavinderAI, you will accept
+    <br>their
+    Terms & Conditions</a>
+</footer>
+</body>
+    </html>

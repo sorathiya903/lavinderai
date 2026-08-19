@@ -1,332 +1,1299 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Create Chatbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Chatbot</title>
 
-<style>
-  
-body {
-  margin:0;
-  font-family: Arial;
-  background:#f7f6fb;
-}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-/* HEADER */
-.header {
-  background:white;
-  padding:15px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
 
-.title {
-  font-size:18px;
-  font-weight:bold;
-  color:#7c4dff;
-}
+  <style>
 
-/* PROFILE */
-.profile {
-  position:relative;
-  cursor:pointer;
-}
+    /* =================================
+       THEME
+    ================================= */
 
-.profile img {
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  border:2px solid #7c4dff;
-}
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f6f6f6;
 
-.dropdown {
-  position:absolute;
-  right:0;
-  top:55px;
-  background:white;
-  border-radius:12px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
-  padding:15px;
-  width:180px;
-  display:none;
-  animation:fade 0.2s ease;
-}
+      --surface: #ffffff;
+      --surface-2: #f1f1f1;
 
-.dropdown button {
-  width:100%;
-  margin-top:8px;
-  background:#7c4dff;
-  border:none;
-  color:white;
-  padding:8px;
-  border-radius:8px;
-}
+      --text: #0a0a0a;
+      --text-soft: #555;
+      --text-muted: #888;
 
-.dropdown .danger {
-  background:red;
-}
+      --border: #e5e5e5;
+      --border-strong: #d0d0d0;
 
-@keyframes fade {
-  from {opacity:0; transform:translateY(-10px);}
-  to {opacity:1; transform:translateY(0);}
-}
+      --button: #0a0a0a;
+      --button-text: #ffffff;
 
-/* FORM BOX */
-.box {
-  background:white;
-  padding:25px;
-  margin:60px auto;
-  width:90%;
-  max-width:400px;
-  border-radius:14px;
-  box-shadow:0 5px 20px rgba(0,0,0,0.05);
-  animation:pop 0.3s ease;box-sizing: border-box
-}
+      --danger: #111;
 
-@keyframes pop {
-  from {transform:scale(0.95); opacity:0;}
-  to {transform:scale(1); opacity:1;}
-}
+      --shadow:
+        0 15px 45px rgba(0, 0, 0, 0.07);
+    }
 
-input, textarea {
-  width:100%;
-  padding:12px;
-  margin:10px 0;
-  border:1px solid #ddd;
-  border-radius:10px;
-  outline:none;
-  transition:0.2s;box-sizing: border-box
-}
+    body.dark {
+      --bg: #080808;
+      --bg-soft: #101010;
 
-input:focus, textarea:focus {
-  border-color:#7c4dff;
-  box-shadow:0 0 0 2px rgba(124,77,255,0.1);
-}
+      --surface: #111111;
+      --surface-2: #181818;
 
-button {
-  width:100%;
-  padding:12px;
-  background:#7c4dff;
-  color:white;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  transition:0.2s;
-}
+      --text: #f5f5f5;
+      --text-soft: #b5b5b5;
+      --text-muted: #858585;
 
-button:hover {
-  background:#6a3df0;
-}
+      --border: #262626;
+      --border-strong: #353535;
 
-/* URL PREVIEW */
-.preview {
-  background:#f1efff;
-  padding:12px;
-  border-radius:10px;
-  font-size:13px;
-  margin-top:5px;
-  min-height:40px;
-  transition:0.2s;
-}
+      --button: #ffffff;
+      --button-text: #000000;
 
-.available {
-  background-color: #007bff; /* Primary color */
-  color: white;
-  padding: 4px 8px;
-  text-align: center;
-  border-radius: 10px; /* High radius for pill shape */
-  font-size: 12px;
-  font-weight: bold;
-  display: inline-block;
-}
+      --danger: #ffffff;
 
-.notavailable {
-  background-color: tomato; /* Primary color */
-  color: white;
-  padding: 4px 8px;
-  text-align: center;
-  border-radius: 10px; /* High radius for pill shape */
-  font-size: 12px;
-  font-weight: bold;
-  display: inline-block;
-}
+      --shadow:
+        0 15px 45px rgba(0, 0, 0, 0.4);
+    }
 
-#btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-  .profile-menu {
-  position: absolute;
-  right: 20px;
-  top: 70px;
-  background: white;
-  padding: 15px;
-  border-radius: 12px;
-  width: 220px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-  display: none;
-  z-index: 100;
-}
 
-.profile-menu a {
-  display: block;
-  margin-top: 10px;
-  color: #7c4dff;
-  text-decoration: none;
-}
+    /* =================================
+       RESET
+    ================================= */
 
-.profile-menu button {
-  width: 100%;
-  margin-top: 10px;
-  background: red;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-.profile-menu hr {
-  border: none;
-  border-top: 1px solid #eee;
-  margin: 10px 0;
-}
-</style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+
+      font-family: "Inter", sans-serif;
+
+      background: var(--bg);
+      color: var(--text);
+
+      min-height: 100vh;
+
+      transition:
+        background 0.3s ease,
+        color 0.3s ease;
+    }
+
+    button,
+    input,
+    textarea {
+      font-family: inherit;
+    }
+
+
+    /* =================================
+       HEADER
+    ================================= */
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+
+      height: 72px;
+
+      border-bottom: 1px solid var(--border);
+
+      background: color-mix(
+        in srgb,
+        var(--bg) 90%,
+        transparent
+      );
+
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .header-inner {
+      width: min(1120px, calc(100% - 40px));
+
+      height: 100%;
+
+      margin: auto;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+
+    /* =================================
+       LOGO
+    ================================= */
+
+    .title {
+      font-family: "Space Grotesk", sans-serif;
+
+      font-size: 21px;
+      font-weight: 700;
+
+      letter-spacing: -0.7px;
+
+      cursor: pointer;
+    }
+
+    .title span {
+      color: var(--text-muted);
+    }
+
+
+    /* =================================
+       HEADER RIGHT
+    ================================= */
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+
+    /* =================================
+       THEME BUTTON
+    ================================= */
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+
+      border: 1px solid var(--border);
+
+      border-radius: 50%;
+
+      background: var(--surface);
+      color: var(--text);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      cursor: pointer;
+
+      font-size: 16px;
+
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: rotate(12deg);
+      border-color: var(--border-strong);
+    }
+
+
+    /* =================================
+       PROFILE
+    ================================= */
+
+    .profile {
+      position: relative;
+
+      cursor: pointer;
+
+      display: flex;
+      align-items: center;
+    }
+
+    .profile img {
+      width: 40px;
+      height: 40px;
+
+      border-radius: 50%;
+
+      object-fit: cover;
+
+      border: 1px solid var(--border-strong);
+
+      transition: 0.2s ease;
+    }
+
+    .profile:hover img {
+      border-color: var(--text);
+    }
+
+
+    /* =================================
+       PROFILE MENU
+    ================================= */
+
+    .profile-menu {
+      position: absolute;
+
+      right: 0;
+      top: 52px;
+
+      width: 240px;
+
+      padding: 18px;
+
+      background: var(--surface);
+
+      border: 1px solid var(--border);
+
+      border-radius: 14px;
+
+      box-shadow: var(--shadow);
+
+      display: none;
+
+      animation: menuIn 0.2s ease;
+
+      z-index: 2000;
+    }
+
+    .profile-menu.show {
+      display: block;
+    }
+
+    @keyframes menuIn {
+      from {
+        opacity: 0;
+        transform: translateY(-7px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .profile-name {
+      font-size: 14px;
+
+      margin: 0;
+    }
+
+    .profile-email {
+      color: var(--text-muted);
+
+      font-size: 12px;
+
+      margin: 5px 0 15px;
+      word-break: break-word;
+    }
+
+    .profile-menu hr {
+      border: none;
+
+      border-top: 1px solid var(--border);
+
+      margin: 12px 0;
+    }
+
+    .profile-menu a {
+      display: block;
+
+      color: var(--text);
+
+      text-decoration: none;
+
+      font-size: 13px;
+
+      padding: 9px 0;
+    }
+
+    .profile-menu a:hover {
+      text-decoration: underline;
+    }
+
+    .delete-btn {
+      width: 100%;
+
+      margin-top: 10px;
+
+      padding: 10px;
+
+      border: 1px solid var(--border);
+
+      border-radius: 8px;
+
+      background: transparent;
+
+      color: var(--text);
+
+      cursor: pointer;
+
+      font-size: 13px;
+
+      transition: 0.2s ease;
+    }
+
+    .delete-btn:hover {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+
+    /* =================================
+       MAIN
+    ================================= */
+
+    main {
+      min-height: calc(100vh - 72px);
+
+      display: flex;
+      justify-content: center;
+
+      padding: 80px 20px 100px;
+    }
+
+
+    /* =================================
+       CREATE CONTAINER
+    ================================= */
+
+    .create-container {
+      width: 100%;
+      max-width: 650px;
+    }
+
+
+    /* =================================
+       PAGE INTRO
+    ================================= */
+
+    .page-intro {
+      text-align: center;
+
+      margin-bottom: 35px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+
+      padding: 6px 11px;
+
+      border: 1px solid var(--border);
+
+      border-radius: 999px;
+
+      background: var(--surface);
+
+      color: var(--text-muted);
+
+      font-size: 11px;
+      font-weight: 600;
+
+      text-transform: uppercase;
+
+      letter-spacing: 1.5px;
+
+      margin-bottom: 18px;
+    }
+
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+
+      border-radius: 50%;
+
+      background: var(--text);
+    }
+
+    .page-intro h1 {
+      font-family: "Space Grotesk", sans-serif;
+
+      font-size: clamp(34px, 6vw, 48px);
+
+      line-height: 1.05;
+
+      letter-spacing: -2px;
+
+      margin: 0 0 14px;
+    }
+
+    .page-intro p {
+      max-width: 520px;
+
+      margin: auto;
+
+      color: var(--text-soft);
+
+      font-size: 15px;
+
+      line-height: 1.7;
+    }
+
+
+    /* =================================
+       FORM CARD
+    ================================= */
+
+    .box {
+      background: var(--surface);
+
+      border: 1px solid var(--border);
+
+      border-radius: 20px;
+
+      padding: 30px;
+
+      box-shadow: var(--shadow);
+
+      animation: cardIn 0.35s ease;
+    }
+
+    @keyframes cardIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+
+    /* =================================
+       FORM
+    ================================= */
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+
+      margin-bottom: 8px;
+
+      font-size: 13px;
+
+      font-weight: 600;
+    }
+
+    .label-hint {
+      color: var(--text-muted);
+
+      font-size: 11px;
+
+      font-weight: 400;
+
+      margin-left: 5px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+
+      padding: 13px 14px;
+
+      margin: 0;
+
+      border: 1px solid var(--border);
+
+      border-radius: 10px;
+
+      outline: none;
+
+      background: var(--surface);
+
+      color: var(--text);
+
+      font-size: 14px;
+
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--text);
+
+      box-shadow:
+        0 0 0 3px
+        color-mix(
+          in srgb,
+          var(--text) 8%,
+          transparent
+        );
+    }
+
+    textarea {
+      min-height: 180px;
+
+      resize: vertical;
+
+      line-height: 1.6;
+    }
+
+
+    /* =================================
+       URL PREVIEW
+    ================================= */
+
+    .preview {
+      margin-top: 9px;
+
+      padding: 12px 14px;
+
+      min-height: 45px;
+
+      border: 1px solid var(--border);
+
+      border-radius: 10px;
+
+      background: var(--bg-soft);
+
+      color: var(--text-soft);
+
+      font-size: 12px;
+
+      line-height: 1.6;
+
+      word-break: break-word;
+
+      transition: 0.2s ease;
+    }
+
+    .preview b {
+      color: var(--text);
+    }
+
+
+    /* =================================
+       STATUS
+    ================================= */
+
+    .available,
+    .notavailable {
+      display: inline-flex;
+      align-items: center;
+
+      padding: 3px 8px;
+
+      border-radius: 999px;
+
+      font-size: 10px;
+
+      font-weight: 700;
+
+      text-transform: uppercase;
+
+      letter-spacing: 0.5px;
+    }
+
+    .available {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    .notavailable {
+      background: var(--surface-2);
+      color: var(--text);
+
+      border: 1px solid var(--border);
+    }
+
+
+    /* =================================
+       SUBMIT BUTTON
+    ================================= */
+
+    #btn {
+      width: 100%;
+
+      padding: 14px;
+
+      border: 1px solid var(--button);
+
+      border-radius: 10px;
+
+      background: var(--button);
+
+      color: var(--button-text);
+
+      cursor: pointer;
+
+      font-size: 14px;
+
+      font-weight: 600;
+
+      transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+    }
+
+    #btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      opacity: 0.88;
+    }
+
+    #btn:disabled {
+      background: var(--surface-2);
+
+      color: var(--text-muted);
+
+      border-color: var(--border);
+
+      cursor: not-allowed;
+
+      opacity: 1;
+    }
+
+
+    /* =================================
+       FORM FOOTER
+    ================================= */
+
+    .form-note {
+      margin-top: 15px;
+
+      text-align: center;
+
+      color: var(--text-muted);
+
+      font-size: 11px;
+
+      line-height: 1.6;
+    }
+
+
+    /* =================================
+       MOBILE
+    ================================= */
+
+    @media (max-width: 600px) {
+
+      .header {
+        height: 66px;
+      }
+
+      .header-inner {
+        width: calc(100% - 30px);
+      }
+
+      .title {
+        font-size: 18px;
+      }
+
+      .theme-toggle {
+        width: 38px;
+        height: 38px;
+      }
+
+      .profile img {
+        width: 38px;
+        height: 38px;
+      }
+
+      .profile-menu {
+        right: -5px;
+        top: 49px;
+
+        width: 220px;
+      }
+
+      main {
+        padding: 55px 15px 70px;
+      }
+
+      .page-intro {
+        margin-bottom: 25px;
+      }
+
+      .page-intro h1 {
+        letter-spacing: -1.5px;
+      }
+
+      .page-intro p {
+        font-size: 14px;
+      }
+
+      .box {
+        padding: 22px;
+
+        border-radius: 16px;
+      }
+
+      textarea {
+        min-height: 160px;
+      }
+    }
+
+
+    /* =================================
+       REDUCED MOTION
+    ================================= */
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+    }
+
+  </style>
 </head>
+
 
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="title">Create a chatbot</div>
 
-   <div class="profile" onclick="toggleMenu()">
-    <img src="{{ picture }}" alt="">
-  </div>
+<!-- =================================
+     HEADER
+================================= -->
 
-  <div id="profileMenu" class="profile-menu">
-    <p><b>{{ user.name }}</b></p>
-    <p style="font-size:12px;color:gray;">{{ user.email }}</p>
+<header class="header">
 
-    <hr>
+  <div class="header-inner">
 
-    <a href="/logout">Logout</a>
-
-    <form method="POST" onsubmit="markSaved()" action="/delete-account" 
-          onsubmit="return confirm('Delete your account permanently?');">
-      <button class="danger">Delete Account</button>
-    </form>
-  </div>
-</div>
-
-<!-- FORM -->
-<div class="box">
-  <h2>Create Your Chatbot</h2>
-
-  <form method="POST">
-    <input name="name" placeholder="Business Name" required>
-
-    <input id="slug" name="slug" placeholder="Endpoint (my-business)" required>
-
-    <!-- URL PREVIEW -->
-    <div class="preview" id="preview">
-      Type endpoint to see URL...
+    <div
+      class="title"
+      onclick="location.href='/dashboard'"
+    >
+      Lavinder<span>AI</span>
     </div>
 
-    <textarea name="content" placeholder="Enter FAQ / Info" required></textarea>
 
-    <button id="btn" type="submit">Generate Chatbot</button>
-  </form>
-</div>
+    <div class="header-right">
+
+      <!-- THEME TOGGLE -->
+
+      <button
+        class="theme-toggle"
+        id="themeToggle"
+        aria-label="Toggle dark mode"
+        title="Toggle theme"
+      >
+        ☾
+      </button>
+
+
+      <!-- PROFILE -->
+
+      <div class="profile" id="profile">
+
+        <img
+          src="{{ picture }}"
+          alt="Profile"
+        >
+
+        <div
+          id="profileMenu"
+          class="profile-menu"
+        >
+
+          <p class="profile-name">
+            <b>{{ user.name }}</b>
+          </p>
+
+          <p class="profile-email">
+            {{ user.email }}
+          </p>
+
+          <hr>
+
+          <a href="/logout">
+            Logout
+          </a>
+
+          <form
+            method="POST"
+            action="/delete-account"
+            onsubmit="return confirm('Delete your account permanently?');"
+          >
+            <button
+              type="submit"
+              class="delete-btn"
+            >
+              Delete Account
+            </button>
+          </form>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+<!-- =================================
+     MAIN
+================================= -->
+
+<main>
+
+  <div class="create-container">
+
+
+    <!-- INTRO -->
+
+    <div class="page-intro">
+
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Chatbot Builder
+      </div>
+
+      <h1>
+        Create your chatbot.
+      </h1>
+
+      <p>
+        Add your business information and FAQs.
+        LavinderAI will turn them into an AI-powered
+        customer support chatbot.
+      </p>
+
+    </div>
+
+
+    <!-- FORM -->
+
+    <div class="box">
+
+      <form
+        method="POST"
+        id="createForm"
+      >
+
+
+        <!-- BUSINESS NAME -->
+
+        <div class="form-group">
+
+          <label for="businessName">
+            Business Name
+          </label>
+
+          <input
+            id="businessName"
+            name="name"
+            placeholder="e.g. Acme Technologies"
+            autocomplete="organization"
+            required
+          >
+
+        </div>
+
+
+        <!-- SLUG -->
+
+        <div class="form-group">
+
+          <label for="slug">
+            Chatbot URL
+            <span class="label-hint">
+              — choose a unique endpoint
+            </span>
+          </label>
+
+          <input
+            id="slug"
+            name="slug"
+            placeholder="my-business"
+            autocomplete="off"
+            required
+          >
+
+          <div
+            class="preview"
+            id="preview"
+          >
+            Type an endpoint to check availability.
+          </div>
+
+        </div>
+
+
+        <!-- CONTENT -->
+
+        <div class="form-group">
+
+          <label for="content">
+            FAQ / Business Information
+          </label>
+
+          <textarea
+            id="content"
+            name="content"
+            placeholder="Example:
+
+What are your opening hours?
+We are open Monday to Friday from 9 AM to 6 PM.
+
+Where are you located?
+Our office is located in Mumbai.
+
+What services do you provide?
+We provide..."
+            required
+          ></textarea>
+
+        </div>
+
+
+        <!-- SUBMIT -->
+
+        <button
+          id="btn"
+          type="submit"
+        >
+          Generate Chatbot →
+        </button>
+
+
+        <div class="form-note">
+          Your chatbot will be generated using the information
+          you provide above.
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</main>
+
 
 <script>
 
-function toggleMenu() {
-    let menu = document.getElementById("profileMenu");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
-}
-document.addEventListener("click", function(e) {
-    let profile = document.querySelector(".profile");
-    let menu = document.getElementById("profileMenu");
+  /* =================================
+     PROFILE MENU
+  ================================= */
 
-    if (!profile.contains(e.target) && !menu.contains(e.target)) {
-        menu.style.display = "none";
+  const profile = document.getElementById("profile");
+  const profileMenu = document.getElementById("profileMenu");
+
+  profile.addEventListener("click", function(event) {
+
+    event.stopPropagation();
+
+    profileMenu.classList.toggle("show");
+
+  });
+
+
+  document.addEventListener("click", function(event) {
+
+    if (!profile.contains(event.target)) {
+      profileMenu.classList.remove("show");
     }
-});
-  
-let timer = null;
-let btn = document.getElementById("btn");
-let slugInput = document.getElementById("slug");
 
-slugInput.addEventListener("input", function() {
-    let value = this.value.trim().toLowerCase().replace(/ /g, "-");
+  });
 
-    clearTimeout(timer);
 
-    timer = setTimeout(() => {
-        if (!value) {
-            btn.disabled = true;
-            return;
-        }
+  /* =================================
+     DARK MODE
+  ================================= */
 
-        let finalUrl = "https://ai-faq-chatbot-for-businesses.onrender.com" + "/" + value;
+  const themeToggle =
+    document.getElementById("themeToggle");
 
-        fetch("/check-slug/" + value)
-        .then(res => res.json())
+
+  function updateThemeIcon() {
+
+    const isDark =
+      document.body.classList.contains("dark");
+
+    themeToggle.textContent =
+      isDark ? "☀" : "☾";
+
+    themeToggle.setAttribute(
+      "aria-label",
+      isDark
+        ? "Switch to light mode"
+        : "Switch to dark mode"
+    );
+
+    themeToggle.setAttribute(
+      "title",
+      isDark
+        ? "Switch to light mode"
+        : "Switch to dark mode"
+    );
+
+  }
+
+
+  const savedTheme =
+    localStorage.getItem("lavinder-theme");
+
+
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark");
+  }
+
+
+  updateThemeIcon();
+
+
+  themeToggle.addEventListener(
+    "click",
+    function() {
+
+      document.body.classList.toggle("dark");
+
+      const isDark =
+        document.body.classList.contains("dark");
+
+      localStorage.setItem(
+        "lavinder-theme",
+        isDark ? "dark" : "light"
+      );
+
+      updateThemeIcon();
+
+    }
+  );
+
+
+  /* =================================
+     SLUG AVAILABILITY
+  ================================= */
+
+  let timer = null;
+
+  const btn =
+    document.getElementById("btn");
+
+  const slugInput =
+    document.getElementById("slug");
+
+  const preview =
+    document.getElementById("preview");
+
+
+  slugInput.addEventListener(
+    "input",
+    function() {
+
+      let value = this.value
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-+/g, "-");
+
+
+      this.value = value;
+
+      clearTimeout(timer);
+
+
+      if (!value) {
+
+        btn.disabled = true;
+
+        preview.innerHTML =
+          "Type an endpoint to check availability.";
+
+        return;
+
+      }
+
+
+      preview.innerHTML =
+        "Checking availability...";
+
+      btn.disabled = true;
+
+
+      timer = setTimeout(() => {
+
+        const finalUrl =
+          "https://ai-faq-chatbot-for-businesses.onrender.com/"
+          + encodeURIComponent(value);
+
+
+        fetch(
+          "/check-slug/"
+          + encodeURIComponent(value)
+        )
+
+        .then(res => {
+
+          if (!res.ok) {
+            throw new Error(
+              "Unable to check availability"
+            );
+          }
+
+          return res.json();
+
+        })
+
         .then(data => {
 
-            let available = data.available;
+          const available =
+            data.available;
 
-            let status = available 
-                ? `<span class="available">available</span>`
-                : `<span class="notavailable">not available</span>`;
 
-            document.getElementById("preview").innerHTML = `
-                You can get the url <b>${finalUrl}</b><br>
-                The url <b>${value}</b> is ${status}
-            `;
+          const status =
+            available
 
-            btn.disabled = !available;
+              ? `<span class="available">Available</span>`
+
+              : `<span class="notavailable">Not available</span>`;
+
+
+          preview.innerHTML = `
+            You can get the URL
+            <br>
+            <b>${finalUrl}</b>
+            <br><br>
+            <b>${value}</b> is ${status}
+          `;
+
+
+          btn.disabled = !available;
+
+        })
+
+        .catch(error => {
+
+          console.error(error);
+
+          preview.innerHTML =
+            "Unable to check URL availability. Please try again.";
+
+          btn.disabled = true;
+
         });
 
-    }, 500);
-});
-let isDirty = true; // assume user is editing
+      }, 500);
 
-// detect form changes (optional but recommended)
-document.addEventListener("input", () => {
-    isDirty = true;
-});
+    }
+  );
 
-// BACK BUTTON / HISTORY CONTROL
-window.onload = function () {
-    history.pushState(null, "", window.location.href);
-};
 
-window.onpopstate = function () {
-    if (isDirty) {
-        let leave = confirm("You have unsaved changes. Do you want to leave this page?");
-        
+  /* =================================
+     UNSAVED CHANGES
+  ================================= */
+
+  let isDirty = false;
+
+  const createForm =
+    document.getElementById("createForm");
+
+
+  createForm.addEventListener(
+    "input",
+    function() {
+      isDirty = true;
+    }
+  );
+
+
+  createForm.addEventListener(
+    "submit",
+    function() {
+      isDirty = false;
+    }
+  );
+
+
+  /* =================================
+     BROWSER CLOSE / REFRESH WARNING
+  ================================= */
+
+  window.addEventListener(
+    "beforeunload",
+    function(event) {
+
+      if (isDirty) {
+
+        event.preventDefault();
+
+        event.returnValue = "";
+
+      }
+
+    }
+  );
+
+
+  /* =================================
+     BACK BUTTON
+  ================================= */
+
+  history.pushState(
+    null,
+    "",
+    window.location.href
+  );
+
+
+  window.addEventListener(
+    "popstate",
+    function() {
+
+      if (isDirty) {
+
+        const leave =
+          confirm(
+            "You have unsaved changes. Do you want to leave this page?"
+          );
+
+
         if (leave) {
-            window.location.href = "/dashboard";
+
+          isDirty = false;
+
+          window.location.href =
+            "/dashboard";
+
         } else {
-            history.pushState(null, "", window.location.href);
+
+          history.pushState(
+            null,
+            "",
+            window.location.href
+          );
+
         }
-    } else {
-        window.location.href = "/dashboard";
-    }
-};
 
-  
-function markSaved() {
-    isDirty = false;
-}
-window.addEventListener("beforeunload", function (e) {
-    if (isDirty) {
-        e.preventDefault();
-        e.returnValue = "";
+      } else {
+
+        window.location.href =
+          "/dashboard";
+
+      }
+
     }
-});
+  );
+
 </script>
-
 
 
 </body>

@@ -799,27 +799,6 @@ def cron_check():
     check_expired_bots()
     return "OK"
 
-    
-#seo relates 
-@app.route('/robots.txt')
-def robots_txt():
-    return send_from_directory('static', 'robots.txt')
-
-@app.route('/sitemap.xml')
-def sitemap_xml():
-    return send_from_directory('static', 'sitemap.xml')
-
-@app.route("/how-it-works")
-def howItWorks():
-    return render_template("how-it-works.html")
-
-@app.route("/terms/")
-def terms_slash():
-    return render_template('terms.html')
-
-@app.route("/how-it-works/")
-def work_slash():
-    return render_template("how-it-works.html")
 
 
 @app.route("/create/")
@@ -846,11 +825,6 @@ def stats_page(slug):
 
     return render_template("stats.html", slug=slug, data=bot_data)
 
-
-
-@app.route("/about")
-def about():
-    return render_template("about.html")
 
 
 @app.route("/api/stats/<slug>")

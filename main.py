@@ -590,11 +590,12 @@ def chat_api(slug):
     # ---------------- OWNER CHECK ----------------
     session_user = session.get("user")
     is_owner = False
-
+    
     if session_user:
-        if session_user.get("email") == user_ref:
-            is_owner = True
+        session_email = session_user.get("email")
 
+        if session_email and safe_email_key(session_email) == user_ref:
+            is_owner = True
     # ---------------- PLAN CHECK (FREE LIMIT) ----------------
     remaining = None
 

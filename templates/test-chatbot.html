@@ -198,7 +198,7 @@ async function sendMessage() {
 
   let loader = document.createElement("div");
   loader.className = "loader";
-  loader.innerText = "Typing...";
+  loader.innerText = "Thinking...";
   document.getElementById("chatbox").appendChild(loader);
 
   let res = await fetch(`/api/chat/${slug}`, {

@@ -835,24 +835,40 @@ def create_slash():
 @app.route("/stats/<slug>")
 def stats_page(slug):
 
-    all_users = requests.get(f"{FIREBASE_URL}/users.json").json() or {}
+    user_session = session.get("user")
 
-    bot_data = None
+    if not user_session:
+        return redirect("/login")
 
-    for user in all_users.values():
-        chatbots = user.get("chatbots", {})
+    email = user_session.get("email")
 
-        if slug in chatbots:
-            bot_data = chatbots[slug]
-            break
+    if not email:
+        return redirect("/login")
+
+    email_key = safe_email_key(email)
+
+    user = get_user(email_key)
+
+    if not user:
+        return "User not found", 404
+
+    # Check user's plan
+    if user.get("plan") != "pro":
+        return render_template("upgrade_required.html")
+
+    # Find chatbot
+    bot_data = user.get("chatbots", {}).get(slug)
 
     if not bot_data:
         return "Chatbot not found", 404
 
-    return render_template("stats.html", slug=slug, data=bot_data)
+    return render_template(
+        "stats.html",
+        slug=slug,
+        data=bot_data
+            )
 
-
-
+    
 @app.route("/about")
 def about():
     return render_template("about.html")

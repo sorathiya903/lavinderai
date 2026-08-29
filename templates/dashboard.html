@@ -409,8 +409,8 @@ a {
     <button onclick="downloadQR('{{ s }}')">Download</button>
     <button onclick="openDetails('{{ s }}')">Details</button>
 
-    <form method="POST" action="/delete/{{ s }}" onsubmit="return confirm('Delete this chatbot?');">
-      <button style="background:red;">Delete</button>
+    <form method="POST" action="/delete/{{ s }}" onsubmit="return confirm('Delete this chatbot?');" >
+      <button style="background:red" data-ga-event="chatbot_delete">Delete</button>
     </form>
 
   </div>

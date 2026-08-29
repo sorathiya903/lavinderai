@@ -274,7 +274,7 @@ def test_chatbot(slug):
     if not bot:
         return "Bot not found"
 
-    return render_template("test-chatbot.html", slug=slug, bot=bot)
+    return render_template("test-chatbot.html", slug=slug, bot=bot,preview_used=bot.get("preview_used", 0))
 
 
 

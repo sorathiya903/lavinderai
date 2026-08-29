@@ -820,6 +820,10 @@ def terms_slash():
 @app.route("/how-it-works/")
 def work_slash():
     return render_template("how-it-works.html")
+    
+@app.route("/pricing/")
+def price_slash():
+    return render_template("price.html")
 
 
 @app.route("/create/")

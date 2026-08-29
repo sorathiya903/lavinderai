@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LYRY9XRFW8"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag("js", new Date());
+gtag("config", "G-LYRY9XRFW8");
+
+document.addEventListener("click", function(e) {
+    const element = e.target.closest("[data-ga-event]");
+    if (!element) return;
+    const eventName = element.getAttribute("data-ga-event");
+    if (typeof gtag === "function") gtag("event", eventName);
+});
+</script>
 <link rel="icon" type="image/webp" href="{{ url_for('static', filename='icon.webp') }}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Test Chatbot</title>

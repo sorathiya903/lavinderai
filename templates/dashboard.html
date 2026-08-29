@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+
+<style>
+  body {
+  -webkit-user-select: none; /* Chrome, Safari */
+  -ms-user-select: none;     /* Edge */
+  user-select: none;         /* Standard */
+  }
+  * {
+  -webkit-tap-highlight-color: transparent;
+  }
+  button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #6366f1; /* nice custom glow */
+  border-radius: 6px;
+  }
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #f7f6fb;
+  color: #222;
+}
+
+.topbar {
+  background: white;
+  padding: 15px 15px;
+  display: flex;align-items:center;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #7c4dff;
+}
+
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 25px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.live { background: #d4f8e8; color: green; }
+.notlive { background: #ffe0e0; color: red; }
+
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+button {
+  background: #7c4dff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover { background: #6a3df0; }
+
+.link-box {
+  margin-top: 20px;
+  background: #f1efff;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+a {
+  color: #7c4dff;
+  font-weight: bold;
+  text-decoration: none;
+}
+.profile {
+  cursor: pointer;
+}
+
+.profile img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #7c4dff;
+}
+
+.profile-menu {
+  position: absolute;
+  right: 20px;
+  top: 70px;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  width: 220px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  display: none;
+  z-index: 100;
+}
+
+.profile-menu a {
+  display: block;
+  margin-top: 10px;
+  color: #7c4dff;
+  text-decoration: none;
+}
+
+.profile-menu button {
+  width: 100%;
+  margin-top: 10px;
+  background: red;
+}
+
+.profile-menu hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 10px 0;
+}
+#qrBox {
+  margin-top: 15px;
+  background: white;
+  display: inline-block;
+  padding: 10px;
+  border-radius: 10px;
+}
+  
+  #bottomSheet {
+  position: fixed;
+  left: 0;
+  bottom: -100%;
+  width: 100%;
+  height: 50%;
+  background: white;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+  transition: 0.3s ease;
+  z-index: 9999;
+}
+
+#bottomSheet.active {
+  bottom: 0;
+}
+
+.sheet-content {
+  padding: 20px;
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+  .plan-badge {
+  margin-top: 10px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  display: inline-block;
+  font-weight: 600;
+}
+
+/* FREE */
+.plan-badge.free {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+  border: 1px solid #94a3b8;
+}
+
+/* PRO */
+.plan-badge.pro {
+  background: rgba(124, 77, 255, 0.2);
+  color: #7c4dff;
+  border: 1px solid #7c4dff;
+  box-shadow: 0 0 10px rgba(124,77,255,0.3);
+    }
+<style>
+.skeleton {
+  background: #e9e9ef;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150px;
+  height: 100%;
+  width: 150px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.6),
+    transparent
+  );
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(400px);
+  }
+}
+
+.skel-line {
+  height: 12px;
+  margin: 10px 0;
+  border-radius: 6px;
+}
+
+.skel-title {
+  height: 18px;
+  width: 60%;
+}
+
+.skel-text {
+  height: 12px;
+  width: 90%;
+}
+
+.skel-text.short {
+  width: 70%;
+}
+</style>
+
+</style>
+</head>
+
+
+
+<body>
+
+<div class="topbar">
+  <div class="logo">Chatbot Dashboard</div>
+
+  <div class="profile" onclick="toggleMenu()">
+  <img src="{{ picture }}" alt="">
+</div>
+
+<div id="profileMenu" class="profile-menu">
+  <p><b>{{ user.name }}</b></p>
+  <p style="font-size:12px;color:gray;">{{ user.email }}</p>
+
+  <!--  PLAN BADGE -->
+  <div class="plan-badge {{ user.plan }}">
+    {{ user.plan|capitalize }} Plan
+  </div>
+
+  <hr>
+
+  {% if user.plan == "free" %}
+  <a href="/pricing">Upgrade</a>
+{% endif %}
+  <a href="/logout">Logout</a>
+
+  <form method="POST" action="/delete-account" 
+        onsubmit="return confirm('Delete your account permanently?');">
+    <button class="danger">Delete Account</button>
+  </form>
+</div>
+</div>
+
+<div class="container">
+  
+  <div class="card">
+
+    <!-- LIST ALL CHATBOTS -->
+    <h3 style="display:flex;justify-content:space-between;align-items:center">
+      Your Chatbots
+
+      <div style="margin-bottom:10px;">
+        <a href="/create">
+          <button>+</button>
+        </a>
+      </div>
+    </h3>
+    
+  {% if user.chatbots %}
+{% for s, bot in user.chatbots.items() %}
+
+<div class="card">
+
+  <!-- HEADER -->
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <b style="font-size:16px;">{{ bot.name }}</b><br>
+      <small style="color:gray;">/{{ s }}</small>
+    </div>
+
+    {% if bot.is_live %}
+      <span class="badge live">LIVE</span>
+    {% else %}
+      <span class="badge notlive">NOT LIVE</span>
+    {% endif %}
+  </div>
+
+  <hr style="margin:10px 0; border:none; border-top:1px solid #eee;">
+
+  <!-- PRIMARY ACTION -->
+  <div style="margin-bottom:10px;">
+
+    {% if user.plan != "pro" %}
+      <button onclick="window.location='/pricing'" style="width:100%;">
+        🔒 Upgrade to Activate
+      </button>
+
+    {% else %}
+      {% if not bot.is_live %}
+        <button onclick="activateBot('{{ s }}')" style="width:100%;">
+          🚀 Activate Chatbot
+        </button>
+      {% else %}
+        <a href="/{{ s }}" target="_blank">
+          <button style="width:100%;">Open Chatbot</button>
+        </a>
+      {% endif %}
+    {% endif %}
+
+  </div>
+
+  <!-- SECONDARY ACTIONS -->
+  <div style="
+  display: flex;
+  gap: 10px;
+  overflow-x: scroll;
+  padding: 8px 4px;
+  white-space: nowrap;
+  scrollbar-width: none;scroll-behavior: smooth;
+  -ms-overflow-style: none;
+">
+  
+  <!-- hide scrollbar for Chrome -->
+  <style>
+    .scroll-bar::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+
+  <div class="scroll-bar" style="display:flex; gap:10px;">
+
+    <button class="edit-btn"
+      data-slug="{{ s }}"
+      data-name="{{ bot.name }}"
+      data-content="{{ bot.content }}">
+      Edit
+    </button>
+
+    <button onclick="openPreview('{{ s }}')">Preview</button>
+
+    {% if user.plan != "pro" %}
+      <button onclick="testBot('{{ s }}')">Test</button>
+    {% endif %}
+
+    {% if user.plan == "pro" %}
+      <a href="/stats/{{ s }}" target="_blank">
+        <button>Stats</button>
+      </a>
+    {% else %}
+      <button onclick="window.location='/pricing'">🔒 Stats</button>
+    {% endif %}
+
+    {% if user.plan == "pro" %}
+      <button onclick="toggleGraph('{{ s }}', this)">📊 Graph</button>
+    {% endif %}
+
+    <button onclick="makeQR('{{ s }}')">QR</button>
+    <button onclick="downloadQR('{{ s }}')">Download</button>
+    <button onclick="openDetails('{{ s }}')">Details</button>
+
+    <form method="POST" action="/delete/{{ s }}" onsubmit="return confirm('Delete this chatbot?');">
+      <button style="background:red;">Delete</button>
+    </form>
+
+  </div>
+  </div>
+
+  <div id="qr-{{ s }}" style="display:none;margin-top:10px;"></div>
+
+</div>
+    <div id="graph-box-{{ s }}" style="display:none; margin-top:10px; background:#fff; padding:10px; border-radius:10px;">
+  <canvas id="graph-{{ s }}" height="120"></canvas>
+    </div>
+
+{% endfor %}
+{% else %}
+    
+
+<div style="text-align:center; padding:30px; color:gray;">
+  <h3>No Chatbots Yet</h3>
+  <p>Create your first chatbot 🚀</p>
+</div>
+
+{% endif %}
+
+            <!-- EDIT MODAL -->
+<div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+
+  <div style="background:white; width:90%; max-width:500px; margin:10% auto; padding:20px; border-radius:12px;">
+    
+    <h2>Edit Chatbot</h2>
+
+    <form method="POST" id="editForm">
+      <input name="name" id="editName" required>
+      <textarea name="content" id="editContent" required></textarea>
+      <button type="submit">Update</button>
+    </form>
+
+    <br>
+    <button onclick="closeEdit()">Close</button>
+
+  </div>
+</div><!-- PREVIEW MODAL -->
+<div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6);">
+
+  <div style="background:white; width:95%; height:90%; margin:3% auto; border-radius:12px; overflow:hidden;">
+    
+    <div style="padding:10px; display:flex; justify-content:space-between; align-items:center;">
+      
+      <b>Preview</b>
+
+      <div style="display:flex; gap:10px;">
+        <button onclick="openInNewTab()">Open in New Tab</button>
+        <button onclick="closePreview()">Close</button>
+      </div>
+
+    </div>
+
+    <iframe id="previewFrame" style="width:100%; height:90%; border:none;"></iframe>
+
+  </div>
+</div>
+    <div id="bottomSheet">
+  <div class="sheet-content">
+    
+    <div class="sheet-header">
+      <span>Chatbot Details</span>
+      <button onclick="closeDetails()">✕</button>
+    </div>
+
+    <div id="detailsContent"></div>
+
+  </div>
+</div>
+<script>
+  function testBot(slug) {
+    window.location.href = "/test/" + slug;
+  }
+document.querySelectorAll(".edit-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const slug = btn.dataset.slug;
+    const name = btn.dataset.name;
+    const content = btn.dataset.content;
+
+    openEdit(slug, name, content);
+  });
+});
+function openEdit(slug, name, content) {
+    document.getElementById("editModal").style.display = "block";
+
+    document.getElementById("editName").value = name;
+    document.getElementById("editContent").value = content;
+
+    document.getElementById("editForm").action =
+        "/edit/" + slug;
+}
+
+function closeEdit() {
+    document.getElementById("editModal").style.display = "none";
+}
+
+
+function openPreview(slug) {
+    document.getElementById("previewModal").style.display = "block";
+
+    document.getElementById("previewFrame").src =
+        "/preview/" + slug;
+}
+function openInNewTab() {
+    let frame = document.getElementById("previewFrame");
+    if (!frame.src) {
+        alert("No preview loaded");
+        return;
+    }
+    window.open(frame.src, "_blank");
+  }
+function closePreview() {
+    document.getElementById("previewModal").style.display = "none";
+}
+
+
+function makeQR(slug) {
+    let base = "https://ai-faq-chatbot-for-businesses.onrender.com/";
+    let url = base + slug;
+
+    let box = document.getElementById("qr-" + slug);
+
+    // if QR already visible → hide it
+    if (box.style.display === "block") {
+        box.style.display = "none";
+        box.innerHTML = "";
+        return;
+    }
+
+    // show QR
+    box.style.display = "block";
+    box.innerHTML = "";
+
+    new QRCode(box, {
+        text: url,
+        width: 150,
+        height: 150
+    });
+}
+
+
+function downloadQR(slug) {
+    let box = document.getElementById("qr-" + slug);
+
+    let canvas = box.querySelector("canvas");
+    if (!canvas) {
+        alert("Generate QR first!");
+        return;
+    }
+
+    let a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = slug + "-qr.png";
+    a.click();
+}
+
+function toggleMenu() {
+    let menu = document.getElementById("profileMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+// close when clicking outside
+document.addEventListener("click", function(e) {
+    let profile = document.querySelector(".profile");
+    let menu = document.getElementById("profileMenu");
+
+    if (!profile.contains(e.target) && !menu.contains(e.target)) {
+        menu.style.display = "none";
+    }
+});
+
+
+    function formatDate(ts) {
+    let d = new Date(ts * 1000);
+    return d.toLocaleString();
+}
+
+async function openDetails(slug) {
+
+    document.getElementById("bottomSheet").classList.add("active");
+     document.getElementById("detailsContent").innerHTML = `
+  <div class="skeleton skel-line skel-title"></div>
+  <div class="skeleton skel-line skel-text"></div>
+  <div class="skeleton skel-line skel-text short"></div>
+  <div class="skeleton skel-line skel-text"></div>
+`;
+    try {
+        let res = await fetch("/api/dashboard-data");
+        let data = await res.json();
+
+        let bot = data.chatbots[slug];
+
+        if (!bot) {
+            document.getElementById("detailsContent").innerHTML = "Bot not found";
+            return;
+        }
+
+        let created = bot.created_at 
+            ? new Date(bot.created_at * 1000).toLocaleString()
+            : "N/A";
+
+        let expires = bot.expires_at 
+            ? new Date(bot.expires_at * 1000).toLocaleString()
+            : "Not active";
+
+        let status = bot.is_live ? "LIVE" : "NOT LIVE";
+
+        document.getElementById("detailsContent").innerHTML = `
+            <p><b>Name:</b> ${bot.name}</p>
+            <p><b>Status:</b> ${status}</p>
+            <p><b>Created:</b> ${created}</p>
+             
+        `;
+
+    } catch (err) {
+        document.getElementById("detailsContent").innerHTML = "Error loading data";
+    }
+  }
+
+function closeDetails() {
+    document.getElementById("bottomSheet").classList.remove("active");
+}
+    
+
+
+    function activateBot(slug) {
+
+    if (!confirm("Activate this chatbot?")) return;
+
+    fetch("/launch/" + slug, {
+        method: "POST"
+    })
+    .then(res => {
+        if (res.redirected) {
+            window.location.href = res.url;
+        } else {
+            return res.text();
+        }
+    })
+    .then(data => {
+        if (data) alert(data);
+        location.reload();
+    })
+    .catch(err => {
+        alert("Error activating chatbot");
+        console.error(err);
+    });
+}
+  const graphCache = {};
+
+async function toggleGraph(slug, btn) {
+    let box = document.getElementById("graph-box-" + slug);
+
+    // CLOSE
+    if (box.style.display === "block") {
+        box.style.display = "none";
+        btn.innerText = "📊 Show Graph";
+        return;
+    }
+
+    // OPEN
+    box.style.display = "block";
+    btn.innerText = "❌ Hide Graph";
+
+    // avoid re-fetch
+    if (graphCache[slug]) return;
+
+    try {
+        let res = await fetch("/api/stats/" + slug);
+        let data = await res.json();
+
+        let ctx = document.getElementById("graph-" + slug).getContext("2d");
+
+        graphCache[slug] = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: ["Visitors", "Questions"],
+                datasets: [{
+                    label: "Stats",
+                    data: [
+                        data.visitors || 0,
+                        data.questions || 0
+                    ],
+                    borderColor: "#7c4dff",
+                    backgroundColor: "rgba(124,77,255,0.2)",
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error("Graph error", err);
+        box.innerHTML = "Failed to load graph";
+    }
+  }
+
+  </script> 
+</body>
+  </html>
